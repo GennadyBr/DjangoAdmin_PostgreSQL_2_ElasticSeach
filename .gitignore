@@ -1,0 +1,8 @@
+/my_app/venv/
+/my_app/config/.env
+/my_app/movies/locale/ru/LC_MESSAGES/django.mo
+/my_app/drafts.py
+/venv/
+/.idea/
+/.idea/vcs.xml
+

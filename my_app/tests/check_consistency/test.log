@@ -1,0 +1,72 @@
+2023-06-22 12:43:42,136 :: my_app.test_data:16 :: INFO :: Creating connection sqlite_conn
+2023-06-22 12:43:42,141 :: my_app.test_data:27 :: INFO :: Creating connection pg_conn
+2023-06-22 12:43:42,154 :: my_app.test_data:30 :: INFO :: Closing connection pg_conn
+2023-06-22 12:43:42,154 :: my_app.test_data:19 :: INFO :: Closing connection sqlite_conn
+2023-06-22 12:43:42,183 :: my_app.test_data:16 :: INFO :: Creating connection sqlite_conn
+2023-06-22 12:43:42,187 :: my_app.test_data:27 :: INFO :: Creating connection pg_conn
+2023-06-22 12:43:42,203 :: my_app.test_data:30 :: INFO :: Closing connection pg_conn
+2023-06-22 12:43:42,203 :: my_app.test_data:19 :: INFO :: Closing connection sqlite_conn
+2023-06-22 12:43:49,623 :: my_app.test_column_names:16 :: INFO :: Creating connection sqlite_conn
+2023-06-22 12:43:49,628 :: my_app.test_column_names:27 :: INFO :: Creating connection pg_conn
+2023-06-22 12:43:49,631 :: my_app.test_column_names:50 :: INFO :: Postgres.db_name='film_work' test_column_names ['id', 'type', 'title', 'rating', 'file_path', 'created_at', 'updated_at', 'description', 'creation_date']
+2023-06-22 12:43:49,631 :: my_app.test_column_names:51 :: INFO :: SQLite.db_name='film_work' test_column_names ['id', 'type', 'title', 'rating', 'file_path', 'created_at', 'updated_at', 'description', 'creation_date']
+2023-06-22 12:43:49,635 :: my_app.test_column_names:50 :: INFO :: Postgres.db_name='person' test_column_names ['id', 'full_name', 'created_at', 'updated_at']
+2023-06-22 12:43:49,635 :: my_app.test_column_names:51 :: INFO :: SQLite.db_name='person' test_column_names ['id', 'full_name', 'created_at', 'updated_at']
+2023-06-22 12:43:49,636 :: my_app.test_column_names:50 :: INFO :: Postgres.db_name='genre' test_column_names ['id', 'name', 'created_at', 'updated_at', 'description']
+2023-06-22 12:43:49,636 :: my_app.test_column_names:51 :: INFO :: SQLite.db_name='genre' test_column_names ['id', 'name', 'created_at', 'updated_at', 'description']
+2023-06-22 12:43:49,638 :: my_app.test_column_names:50 :: INFO :: Postgres.db_name='genre_film_work' test_column_names ['id', 'genre_id', 'created_at', 'film_work_id']
+2023-06-22 12:43:49,638 :: my_app.test_column_names:51 :: INFO :: SQLite.db_name='genre_film_work' test_column_names ['id', 'genre_id', 'created_at', 'film_work_id']
+2023-06-22 12:43:49,643 :: my_app.test_column_names:50 :: INFO :: Postgres.db_name='person_film_work' test_column_names ['id', 'role', 'person_id', 'created_at', 'film_work_id']
+2023-06-22 12:43:49,643 :: my_app.test_column_names:51 :: INFO :: SQLite.db_name='person_film_work' test_column_names ['id', 'role', 'person_id', 'created_at', 'film_work_id']
+2023-06-22 12:43:49,643 :: my_app.test_column_names:30 :: INFO :: Closing connection pg_conn
+2023-06-22 12:43:49,643 :: my_app.test_column_names:19 :: INFO :: Closing connection sqlite_conn
+2023-06-22 12:43:49,666 :: my_app.test_column_names:16 :: INFO :: Creating connection sqlite_conn
+2023-06-22 12:43:49,670 :: my_app.test_column_names:27 :: INFO :: Creating connection pg_conn
+2023-06-22 12:43:49,672 :: my_app.test_column_names:50 :: INFO :: Postgres.db_name='film_work' test_column_names ['id', 'type', 'title', 'rating', 'file_path', 'created_at', 'updated_at', 'description', 'creation_date']
+2023-06-22 12:43:49,672 :: my_app.test_column_names:51 :: INFO :: SQLite.db_name='film_work' test_column_names ['id', 'type', 'title', 'rating', 'file_path', 'created_at', 'updated_at', 'description', 'creation_date']
+2023-06-22 12:43:49,675 :: my_app.test_column_names:50 :: INFO :: Postgres.db_name='person' test_column_names ['id', 'full_name', 'created_at', 'updated_at']
+2023-06-22 12:43:49,676 :: my_app.test_column_names:51 :: INFO :: SQLite.db_name='person' test_column_names ['id', 'full_name', 'created_at', 'updated_at']
+2023-06-22 12:43:49,676 :: my_app.test_column_names:50 :: INFO :: Postgres.db_name='genre' test_column_names ['id', 'name', 'created_at', 'updated_at', 'description']
+2023-06-22 12:43:49,676 :: my_app.test_column_names:51 :: INFO :: SQLite.db_name='genre' test_column_names ['id', 'name', 'created_at', 'updated_at', 'description']
+2023-06-22 12:43:49,678 :: my_app.test_column_names:50 :: INFO :: Postgres.db_name='genre_film_work' test_column_names ['id', 'genre_id', 'created_at', 'film_work_id']
+2023-06-22 12:43:49,678 :: my_app.test_column_names:51 :: INFO :: SQLite.db_name='genre_film_work' test_column_names ['id', 'genre_id', 'created_at', 'film_work_id']
+2023-06-22 12:43:49,683 :: my_app.test_column_names:50 :: INFO :: Postgres.db_name='person_film_work' test_column_names ['id', 'role', 'person_id', 'created_at', 'film_work_id']
+2023-06-22 12:43:49,683 :: my_app.test_column_names:51 :: INFO :: SQLite.db_name='person_film_work' test_column_names ['id', 'role', 'person_id', 'created_at', 'film_work_id']
+2023-06-22 12:43:49,683 :: my_app.test_column_names:30 :: INFO :: Closing connection pg_conn
+2023-06-22 12:43:49,683 :: my_app.test_column_names:19 :: INFO :: Closing connection sqlite_conn
+2023-06-22 12:43:58,434 :: my_app.test_row_numbers:16 :: INFO :: Creating connection sqlite_conn
+2023-06-22 12:43:58,439 :: my_app.test_row_numbers:27 :: INFO :: Creating connection pg_conn
+2023-06-22 12:43:58,448 :: my_app.test_row_numbers:50 :: INFO :: Postgres.db_name='film_work' number of row 999
+2023-06-22 12:43:58,448 :: my_app.test_row_numbers:51 :: INFO :: SQLite.db_name='film_work' number of row 999
+2023-06-22 12:43:58,467 :: my_app.test_row_numbers:50 :: INFO :: Postgres.db_name='person' number of row 4166
+2023-06-22 12:43:58,468 :: my_app.test_row_numbers:51 :: INFO :: SQLite.db_name='person' number of row 4166
+2023-06-22 12:43:58,469 :: my_app.test_row_numbers:50 :: INFO :: Postgres.db_name='genre' number of row 26
+2023-06-22 12:43:58,469 :: my_app.test_row_numbers:51 :: INFO :: SQLite.db_name='genre' number of row 26
+2023-06-22 12:43:58,481 :: my_app.test_row_numbers:50 :: INFO :: Postgres.db_name='genre_film_work' number of row 2231
+2023-06-22 12:43:58,481 :: my_app.test_row_numbers:51 :: INFO :: SQLite.db_name='genre_film_work' number of row 2231
+2023-06-22 12:43:58,513 :: my_app.test_row_numbers:50 :: INFO :: Postgres.db_name='person_film_work' number of row 5783
+2023-06-22 12:43:58,513 :: my_app.test_row_numbers:51 :: INFO :: SQLite.db_name='person_film_work' number of row 5783
+2023-06-22 12:43:58,513 :: my_app.test_row_numbers:30 :: INFO :: Closing connection pg_conn
+2023-06-22 12:43:58,513 :: my_app.test_row_numbers:19 :: INFO :: Closing connection sqlite_conn
+2023-06-22 12:43:58,540 :: my_app.test_row_numbers:16 :: INFO :: Creating connection sqlite_conn
+2023-06-22 12:43:58,544 :: my_app.test_row_numbers:27 :: INFO :: Creating connection pg_conn
+2023-06-22 12:43:58,553 :: my_app.test_row_numbers:50 :: INFO :: Postgres.db_name='film_work' number of row 999
+2023-06-22 12:43:58,553 :: my_app.test_row_numbers:51 :: INFO :: SQLite.db_name='film_work' number of row 999
+2023-06-22 12:43:58,569 :: my_app.test_row_numbers:50 :: INFO :: Postgres.db_name='person' number of row 4166
+2023-06-22 12:43:58,570 :: my_app.test_row_numbers:51 :: INFO :: SQLite.db_name='person' number of row 4166
+2023-06-22 12:43:58,571 :: my_app.test_row_numbers:50 :: INFO :: Postgres.db_name='genre' number of row 26
+2023-06-22 12:43:58,571 :: my_app.test_row_numbers:51 :: INFO :: SQLite.db_name='genre' number of row 26
+2023-06-22 12:43:58,581 :: my_app.test_row_numbers:50 :: INFO :: Postgres.db_name='genre_film_work' number of row 2231
+2023-06-22 12:43:58,581 :: my_app.test_row_numbers:51 :: INFO :: SQLite.db_name='genre_film_work' number of row 2231
+2023-06-22 12:43:58,604 :: my_app.test_row_numbers:50 :: INFO :: Postgres.db_name='person_film_work' number of row 5783
+2023-06-22 12:43:58,605 :: my_app.test_row_numbers:51 :: INFO :: SQLite.db_name='person_film_work' number of row 5783
+2023-06-22 12:43:58,605 :: my_app.test_row_numbers:30 :: INFO :: Closing connection pg_conn
+2023-06-22 12:43:58,605 :: my_app.test_row_numbers:19 :: INFO :: Closing connection sqlite_conn
+2023-06-22 12:44:11,557 :: my_app.test_data:16 :: INFO :: Creating connection sqlite_conn
+2023-06-22 12:44:11,564 :: my_app.test_data:27 :: INFO :: Creating connection pg_conn
+2023-06-22 12:44:11,576 :: my_app.test_data:30 :: INFO :: Closing connection pg_conn
+2023-06-22 12:44:11,577 :: my_app.test_data:19 :: INFO :: Closing connection sqlite_conn
+2023-06-22 12:44:11,600 :: my_app.test_data:16 :: INFO :: Creating connection sqlite_conn
+2023-06-22 12:44:11,603 :: my_app.test_data:27 :: INFO :: Creating connection pg_conn
+2023-06-22 12:44:11,615 :: my_app.test_data:30 :: INFO :: Closing connection pg_conn
+2023-06-22 12:44:11,615 :: my_app.test_data:19 :: INFO :: Closing connection sqlite_conn
