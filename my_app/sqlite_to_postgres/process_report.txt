@@ -1,0 +1,16 @@
+[2023-06-08 13:25:01.343177] DATABASE genre. inserted 26 rows
+[2023-06-08 13:25:03.787376] DATABASE genre_film_work. inserted 1000 rows
+[2023-06-08 13:25:06.306197] DATABASE genre_film_work. inserted 1000 rows
+[2023-06-08 13:25:06.828939] DATABASE genre_film_work. inserted 231 rows
+[2023-06-08 13:25:09.450595] DATABASE person_film_work. inserted 1000 rows
+[2023-06-08 13:25:12.019489] DATABASE person_film_work. inserted 1000 rows
+[2023-06-08 13:25:14.511299] DATABASE person_film_work. inserted 1000 rows
+[2023-06-08 13:25:16.899099] DATABASE person_film_work. inserted 1000 rows
+[2023-06-08 13:25:19.717053] DATABASE person_film_work. inserted 1000 rows
+[2023-06-08 13:25:21.579365] DATABASE person_film_work. inserted 783 rows
+[2023-06-08 13:25:23.858608] DATABASE person. inserted 1000 rows
+[2023-06-08 13:25:26.116539] DATABASE person. inserted 1000 rows
+[2023-06-08 13:25:28.930682] DATABASE person. inserted 1000 rows
+[2023-06-08 13:25:31.572661] DATABASE person. inserted 1000 rows
+[2023-06-08 13:25:31.904421] DATABASE person. inserted 166 rows
+[2023-06-08 13:25:34.721133] DATABASE film_work. inserted 999 rows
