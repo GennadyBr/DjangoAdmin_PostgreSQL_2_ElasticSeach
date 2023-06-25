@@ -12,8 +12,8 @@ docker compose down
 echo "UP Docker Compose"
 docker compose up -d --build
 
-echo "List-up Docker"
-docker ps -a
+#echo "List-up Docker"
+#docker ps -a
 
 #echo "Apply database makemigrations"
 #python my_app/manage.py makemigrations
