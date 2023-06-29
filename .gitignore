@@ -6,3 +6,8 @@
 /.idea/
 /.idea/vcs.xml
 
+/etl/main_old.py
+/etl/try_helpers.bulk.py
+/etl/try_bulk.py
+/etl/ETLTests-2.json
+/etl/logs/

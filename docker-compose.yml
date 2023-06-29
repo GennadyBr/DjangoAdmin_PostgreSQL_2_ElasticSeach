@@ -10,6 +10,9 @@ services:
     image: postgres:14.7
     container_name: db_container
     env_file: .postgres_dc_env
+    environment:
+      TZ: "Europe/Moscow"
+      PGTZ: "Europe/Moscow"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 #    ports:
