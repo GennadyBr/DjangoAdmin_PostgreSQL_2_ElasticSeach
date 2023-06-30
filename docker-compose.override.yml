@@ -32,6 +32,11 @@ services:
       - my_net_1
 
 
+  etl_dc:
+    networks:
+      - my_net_1
+
+
 networks:
   my_net_1:
     driver: bridge

@@ -74,26 +74,3 @@ class Movie(BaseModel):
     index: Optional[dict] = {}
     doc: Optional[dict] = {}
     updated_at: datetime
-    # imdb_rating: Optional[str] = ''
-    # genres: Optional[str] = ''
-    # title: Optional[str] = ''
-    # description: Optional[str] = ''
-    # director: Optional[str] = ''
-    # actors_names: Optional[str] = ''
-    # writers_names: Optional[str] = ''
-    # actors: Optional[dict] = {}
-    # writers: Optional[dict] = {}
-
-
-
-    # @root_validator
-    # def validate_fields(cls, values: Any):
-    #     if 'title' not in values:
-    #         values['title'] = 'None'
-    #     if 'description' not in values:
-    #         values['description'] = 'None'
-    #     if 'file_path' not in values:
-    #         values['file_path'] = 'None'
-    #     if 'imdb_rating' not in values:
-    #         values['rating'] = 1.0
-    #     return values

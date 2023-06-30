@@ -6,6 +6,7 @@ volumes:
   media_volume:
 
 services:
+  #start POSTGRES Container
   postgres_dc:
     image: postgres:14.7
     container_name: db_container
@@ -15,12 +16,11 @@ services:
       PGTZ: "Europe/Moscow"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-#    ports:
-#      - "5432:5432"
     restart: always
     networks:
       - my_net_1
 
+  #start DJANGO Container from Dockerfile
   backend:
     # Путь к Dockerfile для сервиса
     build: my_app
@@ -37,6 +37,7 @@ services:
   # у вас есть некий сервис, который собирается через Dockerfile и отдаёт 8000-й порт.
   # К нему нужно присоединить Nginx, который будет обрабатывать соединения на 80-м порту
 
+  #start NGINX Container
   nginx_dc:
     image: nginx:1.19.2
     container_name: nginx_container
@@ -49,12 +50,11 @@ services:
       - media_volume:/opt/my_app/media/
     depends_on:
       - backend
-#    ports:
-#      - "80:80"
     networks:
       - my_net_1
 
 
+  #start SWAGGER Container
   swagger_dc:
     image: swaggerapi/swagger-ui
     container_name: swagger_container
@@ -64,24 +64,26 @@ services:
       - /home/gennady/PY_YANDEX/new_admin_panel_sprint_2/django_api/openapi.yaml:/swagger.yaml
     depends_on:
       - backend
-#    ports:
-#      - "8080:8080"
     networks:
       - my_net_1
 
-
+  #start ELASTICSEARCH Container
   elastic_dc:
     image: elasticsearch:8.6.2
     container_name: elastic_container
     env_file: .elastic_dc_env
-#    environment:
-#      - discovery.type=single-node
-#      - xpack.security.enabled=false
-#      - ES_JAVA_OPTS="-Xms200m -Xmx200m"
-#    ports:
-#      - "9200:9200"
     networks:
       - my_net_1
+
+  etl_dc:
+    build: etl
+    container_name: etl_container
+    restart: always
+    networks:
+      - my_net_1
+    depends_on:
+      - backend
+      - postgres_dc
 
 
 networks:

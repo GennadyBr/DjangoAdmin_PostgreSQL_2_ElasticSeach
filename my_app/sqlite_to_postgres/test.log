@@ -196,3 +196,69 @@
 2023-06-29 02:59:21,814 :: my_app.load_data:71 :: INFO :: finish handling db_name='person_film_work'
 2023-06-29 02:59:21,814 :: my_app.load_data:33 :: INFO :: Closing connection pg_conn
 2023-06-29 02:59:21,814 :: my_app.load_data:22 :: INFO :: Closing connection sqlite_conn
+2023-06-30 05:01:51,801 :: my_app.load_data:19 :: INFO :: Creating connection sqlite_conn
+2023-06-30 05:01:51,811 :: my_app.load_data:30 :: INFO :: Creating connection pg_conn
+2023-06-30 05:01:51,812 :: my_app.load_data:54 :: INFO :: start handling db_name='genre'
+2023-06-30 05:01:51,836 :: my_app.load_data:17 :: INFO :: table SQLite.genre, extracted 26 rows
+2023-06-30 05:01:51,899 :: my_app.load_data:51 :: INFO :: table Postgres.genre. inserted 26 rows
+2023-06-30 05:01:51,900 :: my_app.load_data:17 :: INFO :: table SQLite.genre, extracted 0 rows
+2023-06-30 05:01:51,900 :: my_app.load_data:71 :: INFO :: finish handling db_name='genre'
+2023-06-30 05:01:51,900 :: my_app.load_data:54 :: INFO :: start handling db_name='person'
+2023-06-30 05:01:51,931 :: my_app.load_data:17 :: INFO :: table SQLite.person, extracted 3000 rows
+2023-06-30 05:01:59,879 :: my_app.load_data:51 :: INFO :: table Postgres.person. inserted 3000 rows
+2023-06-30 05:01:59,881 :: my_app.load_data:17 :: INFO :: table SQLite.person, extracted 1166 rows
+2023-06-30 05:02:03,769 :: my_app.load_data:51 :: INFO :: table Postgres.person. inserted 1166 rows
+2023-06-30 05:02:03,769 :: my_app.load_data:17 :: INFO :: table SQLite.person, extracted 0 rows
+2023-06-30 05:02:03,769 :: my_app.load_data:71 :: INFO :: finish handling db_name='person'
+2023-06-30 05:02:03,769 :: my_app.load_data:54 :: INFO :: start handling db_name='film_work'
+2023-06-30 05:02:03,832 :: my_app.load_data:17 :: INFO :: table SQLite.film_work, extracted 999 rows
+2023-06-30 05:02:06,903 :: my_app.load_data:51 :: INFO :: table Postgres.film_work. inserted 999 rows
+2023-06-30 05:02:06,903 :: my_app.load_data:17 :: INFO :: table SQLite.film_work, extracted 0 rows
+2023-06-30 05:02:06,903 :: my_app.load_data:71 :: INFO :: finish handling db_name='film_work'
+2023-06-30 05:02:06,903 :: my_app.load_data:54 :: INFO :: start handling db_name='genre_film_work'
+2023-06-30 05:02:06,920 :: my_app.load_data:17 :: INFO :: table SQLite.genre_film_work, extracted 2231 rows
+2023-06-30 05:02:12,285 :: my_app.load_data:51 :: INFO :: table Postgres.genre_film_work. inserted 2231 rows
+2023-06-30 05:02:12,285 :: my_app.load_data:17 :: INFO :: table SQLite.genre_film_work, extracted 0 rows
+2023-06-30 05:02:12,285 :: my_app.load_data:71 :: INFO :: finish handling db_name='genre_film_work'
+2023-06-30 05:02:12,285 :: my_app.load_data:54 :: INFO :: start handling db_name='person_film_work'
+2023-06-30 05:02:12,306 :: my_app.load_data:17 :: INFO :: table SQLite.person_film_work, extracted 3000 rows
+2023-06-30 05:02:20,911 :: my_app.load_data:51 :: INFO :: table Postgres.person_film_work. inserted 3000 rows
+2023-06-30 05:02:20,916 :: my_app.load_data:17 :: INFO :: table SQLite.person_film_work, extracted 2783 rows
+2023-06-30 05:02:29,304 :: my_app.load_data:51 :: INFO :: table Postgres.person_film_work. inserted 2783 rows
+2023-06-30 05:02:29,307 :: my_app.load_data:17 :: INFO :: table SQLite.person_film_work, extracted 0 rows
+2023-06-30 05:02:29,307 :: my_app.load_data:71 :: INFO :: finish handling db_name='person_film_work'
+2023-06-30 05:02:29,307 :: my_app.load_data:33 :: INFO :: Closing connection pg_conn
+2023-06-30 05:02:29,308 :: my_app.load_data:22 :: INFO :: Closing connection sqlite_conn
+2023-06-30 05:30:00,856 :: my_app.load_data:19 :: INFO :: Creating connection sqlite_conn
+2023-06-30 05:30:00,908 :: my_app.load_data:30 :: INFO :: Creating connection pg_conn
+2023-06-30 05:30:00,909 :: my_app.load_data:54 :: INFO :: start handling db_name='genre'
+2023-06-30 05:30:00,938 :: my_app.load_data:17 :: INFO :: table SQLite.genre, extracted 26 rows
+2023-06-30 05:30:01,002 :: my_app.load_data:51 :: INFO :: table Postgres.genre. inserted 26 rows
+2023-06-30 05:30:01,002 :: my_app.load_data:17 :: INFO :: table SQLite.genre, extracted 0 rows
+2023-06-30 05:30:01,002 :: my_app.load_data:71 :: INFO :: finish handling db_name='genre'
+2023-06-30 05:30:01,002 :: my_app.load_data:54 :: INFO :: start handling db_name='person'
+2023-06-30 05:30:01,035 :: my_app.load_data:17 :: INFO :: table SQLite.person, extracted 3000 rows
+2023-06-30 05:30:09,436 :: my_app.load_data:51 :: INFO :: table Postgres.person. inserted 3000 rows
+2023-06-30 05:30:09,438 :: my_app.load_data:17 :: INFO :: table SQLite.person, extracted 1166 rows
+2023-06-30 05:30:13,234 :: my_app.load_data:51 :: INFO :: table Postgres.person. inserted 1166 rows
+2023-06-30 05:30:13,234 :: my_app.load_data:17 :: INFO :: table SQLite.person, extracted 0 rows
+2023-06-30 05:30:13,234 :: my_app.load_data:71 :: INFO :: finish handling db_name='person'
+2023-06-30 05:30:13,234 :: my_app.load_data:54 :: INFO :: start handling db_name='film_work'
+2023-06-30 05:30:13,332 :: my_app.load_data:17 :: INFO :: table SQLite.film_work, extracted 999 rows
+2023-06-30 05:30:16,237 :: my_app.load_data:51 :: INFO :: table Postgres.film_work. inserted 999 rows
+2023-06-30 05:30:16,238 :: my_app.load_data:17 :: INFO :: table SQLite.film_work, extracted 0 rows
+2023-06-30 05:30:16,238 :: my_app.load_data:71 :: INFO :: finish handling db_name='film_work'
+2023-06-30 05:30:16,238 :: my_app.load_data:54 :: INFO :: start handling db_name='genre_film_work'
+2023-06-30 05:30:16,254 :: my_app.load_data:17 :: INFO :: table SQLite.genre_film_work, extracted 2231 rows
+2023-06-30 05:30:22,575 :: my_app.load_data:51 :: INFO :: table Postgres.genre_film_work. inserted 2231 rows
+2023-06-30 05:30:22,575 :: my_app.load_data:17 :: INFO :: table SQLite.genre_film_work, extracted 0 rows
+2023-06-30 05:30:22,575 :: my_app.load_data:71 :: INFO :: finish handling db_name='genre_film_work'
+2023-06-30 05:30:22,575 :: my_app.load_data:54 :: INFO :: start handling db_name='person_film_work'
+2023-06-30 05:30:22,613 :: my_app.load_data:17 :: INFO :: table SQLite.person_film_work, extracted 3000 rows
+2023-06-30 05:30:31,180 :: my_app.load_data:51 :: INFO :: table Postgres.person_film_work. inserted 3000 rows
+2023-06-30 05:30:31,185 :: my_app.load_data:17 :: INFO :: table SQLite.person_film_work, extracted 2783 rows
+2023-06-30 05:30:38,365 :: my_app.load_data:51 :: INFO :: table Postgres.person_film_work. inserted 2783 rows
+2023-06-30 05:30:38,366 :: my_app.load_data:17 :: INFO :: table SQLite.person_film_work, extracted 0 rows
+2023-06-30 05:30:38,366 :: my_app.load_data:71 :: INFO :: finish handling db_name='person_film_work'
+2023-06-30 05:30:38,366 :: my_app.load_data:33 :: INFO :: Closing connection pg_conn
+2023-06-30 05:30:38,366 :: my_app.load_data:22 :: INFO :: Closing connection sqlite_conn
