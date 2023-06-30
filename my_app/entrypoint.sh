@@ -1,14 +1,14 @@
-#!/bin/sh
-echo ">>>Apply database migrate"
-cd my_app
+#!/bin/bash
+echo ">>>MIGRATE database"
 python manage.py migrate
-echo ">>>Collect static files"
+echo ">>>STATIC files collect"
 python manage.py collectstatic --noinput
-echo ">>>Compile messages"
+echo ">>>COMPILE messages"
 django-admin compilemessages
-echo ">>>Create superuser"
+echo ">>>CREATESUPERUSER"
 python manage.py createsuperuser \
     --noinput \
     --username gennady
+
 echo ">>>Start runserver"
 python manage.py runserver

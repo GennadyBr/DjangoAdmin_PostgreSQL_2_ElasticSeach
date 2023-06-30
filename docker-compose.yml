@@ -29,8 +29,17 @@ services:
       - static_volume:/opt/my_app/static/
       - media_volume:/opt/my_app/media/
     # Порт, с которого сервис будет доступен на локальной машине
+    environment:
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=postgres
+      - POSTGRES_USER=app
+      - POSTGRES_PASSWORD=123qwe
+      - DB_HOST=postgres_dc
+      - DB_PORT=5432
     depends_on:
       - postgres_dc
+    links:
+      - postgres_dc:postgres_dc
     networks:
       - my_net_1
 
