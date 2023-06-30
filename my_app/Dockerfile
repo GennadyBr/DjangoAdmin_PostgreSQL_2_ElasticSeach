@@ -34,11 +34,11 @@ RUN  mkdir -p /var/www/static/ \
      && mkdir -p /var/www/media/ \
      && mkdir -p /opt/my_app/static/ \
      && mkdir -p /opt/my_app/media/
-
+RUN chmod +x *.sh
 
 
 # Скопируйте всё оставшееся. Для ускорения сборки образа эту команду стоит разместить ближе к концу файла.
 COPY entrypoint.sh entrypoint.sh
 COPY . .
 
-ENTRYPOINT [ "sh", "./entrypoint.sh"]
+ENTRYPOINT [ "bash", "./entrypoint.sh"]

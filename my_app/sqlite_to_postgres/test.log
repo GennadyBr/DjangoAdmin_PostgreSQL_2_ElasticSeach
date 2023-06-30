@@ -262,3 +262,13 @@
 2023-06-30 05:30:38,366 :: my_app.load_data:71 :: INFO :: finish handling db_name='person_film_work'
 2023-06-30 05:30:38,366 :: my_app.load_data:33 :: INFO :: Closing connection pg_conn
 2023-06-30 05:30:38,366 :: my_app.load_data:22 :: INFO :: Closing connection sqlite_conn
+2023-06-30 15:31:43,990 :: my_app.load_data:19 :: INFO :: Creating connection sqlite_conn
+2023-06-30 15:31:43,996 :: my_app.load_data:30 :: INFO :: Creating connection pg_conn
+2023-06-30 15:31:43,997 :: my_app.load_data:54 :: INFO :: start handling db_name='genre'
+2023-06-30 15:31:43,998 :: my_app.load_data:33 :: INFO :: Closing connection pg_conn
+2023-06-30 15:31:43,998 :: my_app.load_data:22 :: INFO :: Closing connection sqlite_conn
+2023-06-30 15:44:30,600 :: my_app.load_data:19 :: INFO :: Creating connection sqlite_conn
+2023-06-30 15:44:30,612 :: my_app.load_data:30 :: INFO :: Creating connection pg_conn
+2023-06-30 15:44:30,613 :: my_app.load_data:54 :: INFO :: start handling db_name='genre'
+2023-06-30 15:44:30,613 :: my_app.load_data:33 :: INFO :: Closing connection pg_conn
+2023-06-30 15:44:30,614 :: my_app.load_data:22 :: INFO :: Closing connection sqlite_conn

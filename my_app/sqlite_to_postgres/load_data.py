@@ -41,6 +41,10 @@ def main():
         pg_cursor = pg_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)  # получение курсора
         sqlite_cursor = sqlite_conn.cursor()  # получение курсора
 
+        #по просьбе ревьюра добавлено сюда миграция
+        # call_command("migrate", interactive=False)
+        # call_command("collectstatic - -noinput", interactive=False)
+
         db_name_list_sql = sqlite_cursor.execute(
             f"SELECT * FROM sqlite_master WHERE type='table';")  # получение объекта писка таблиц
         # формирование списка таблиц
@@ -57,11 +61,14 @@ def main():
 
 
 def load_from_sqlite(sqlite_conn: sqlite3.Connection, pg_conn: _connection, db_name: str) -> None:
+
     """Основной метод загрузки данных из SQLite в Postgres"""
     postgres_saver = PostgresSaver(pg_conn, db_name, logger)  # инициализация экземпляра класса PostgresSaver
 
     sqlite_conn.row_factory = sqlite3.Row
     sqlite_extractor = SQLiteExtractor(sqlite_conn, db_name, logger)  # инициализация экземпляра класса SQLiteExtractor
+
+
 
     # цикл извлечения и записи данных по пачкам с шагом (step)
     offset = 0
