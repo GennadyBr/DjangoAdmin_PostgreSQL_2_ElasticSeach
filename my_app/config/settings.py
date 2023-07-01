@@ -18,7 +18,7 @@ from split_settings.tools import include
 
 load_dotenv()
 
-SWAGGER_JSON = '/home/gennady/PY_YANDEX/new_admin_panel_sprint_2/django_api/openapi.yaml'
+# SWAGGER_JSON = '/home/gennady/PY_YANDEX/new_admin_panel_sprint_2/django_api/openapi.yaml'
 #Переменная окружения SWAGGER_JSON необходима, чтобы указать интерфейсу, где именно искать спецификацию openapi.yaml
 
 
@@ -36,7 +36,7 @@ SECRET_KEY = 'DB_SECRET_KEY'
 DEBUG = True
 
 # ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS')
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ["postgres_dc", "*", "127.0.0.1", "localhost", "elastic_dc"]
 # Application definition
 
 INSTALLED_APPS = [

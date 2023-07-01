@@ -1,8 +1,8 @@
 # Укажите необходимую версию python
-FROM python:3.10
+FROM python:3.10.2-buster
 
 # Выберите папку, в которой будут размещаться файлы проекта внутри контейнера
-WORKDIR /opt/app
+WORKDIR /opt/my_app
 
 # Укажите порт, на котором приложение будет доступно внутри Docker-сети
 EXPOSE 8000
@@ -15,8 +15,9 @@ ENV UWSGI_PROCESSES 1
 ENV UWSGI_THREADS 16
 ENV UWSGI_HARAKIRI 240
 #ENV ALLOWED_HOSTS ['DJANGO_ALLOWED_HOSTS']
-ENV ALLOWED_HOSTS ['127.0.0.1']
+ENV ALLOWED_HOSTS ["postgres_dc", "*", "127.0.0.1", "localhost", "elastic_dc"]
 
+RUN apt update && apt install -y netcat
 
 RUN apt update && \
 apt install -y vim && \

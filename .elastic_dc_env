@@ -1,4 +1,0 @@
-#переменные окружения для докер композ эластик
-discovery.type=single-node
-xpack.security.enabled=false
-ES_JAVA_OPTS="-Xms200m -Xmx200m"

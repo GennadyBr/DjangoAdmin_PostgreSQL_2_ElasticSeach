@@ -1,5 +1,0 @@
-#переменные окружения для докер композ постгрес
-POSTGRES_USER=app
-POSTGRES_DB=movies_database
-POSTGRES_SCHEMA=content
-PGDATA=/var/lib/postgresql/data
