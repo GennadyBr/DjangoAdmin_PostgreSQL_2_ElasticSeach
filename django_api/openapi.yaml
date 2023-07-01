@@ -16,6 +16,7 @@ paths:
           schema:
             type: string
       responses:
+        default:
         "200":
           description: ""
           content:
@@ -59,6 +60,7 @@ paths:
           description: ID кинопроизведения
         
       responses:
+        default:
         "200":
           description: ""
           content:

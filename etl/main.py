@@ -16,7 +16,7 @@ from psycopg.rows import dict_row
 from decorators import coroutine
 from logger import logger
 from settings import database_settings
-from etl.models_state import JsonFileStorage, State, Movie, BaseStorage
+from models_state import JsonFileStorage, State, Movie, BaseStorage
 
 load_dotenv()
 
@@ -54,7 +54,7 @@ def index_prep(movie):
             "actors_names": ','.join([act['person_name'] for act in movie['persons'] if
                                       act['person_role'] == 'actor' or act['person_role'] == 'AC']),
             "writers_names": [act['person_name'] for act in movie['persons'] if
-                                       act['person_role'] == 'writer' or act['person_role'] == 'WR'],
+                              act['person_role'] == 'writer' or act['person_role'] == 'WR'],
             "actors": [dict(id=act['person_id'], name=act['person_name']) for act in movie['persons'] if
                        act['person_role'] == 'actor' or act['person_role'] == 'AC'],
             "writers": [dict(id=act['person_id'], name=act['person_name']) for act in movie['persons'] if
@@ -91,9 +91,9 @@ def transform_movies(next_node: Generator) -> Generator[list[dict], None, None]:
     while movie_dicts := (yield):
         batch = []
         for movie_dict in movie_dicts:  # итерируем СПИСОК из словарей
-            movie_dict_prep = index_prep(movie_dict) #трасформация данных
+            movie_dict_prep = index_prep(movie_dict)  # трасформация данных
             movie = Movie(**movie_dict_prep)  # инициализируем BaseModel Класс Movie cо словарем как аргументом
-            batch.append(movie) #подготовка списка из Объектов Movie
+            batch.append(movie)  # подготовка списка из Объектов Movie
         next_node.send(batch)  # передаем следующую Список из Словарей (объект Movie)
 
 
@@ -107,9 +107,9 @@ def save_movies(state: State) -> Generator[list[Movie], None, None]:
         for movie in movies:
             index_dict = {'index': movie.index}
             body.append(index_dict)
-            body.append(movie.doc) #
+            body.append(movie.doc)  #
         logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
-        res = es.bulk(operations=body,)
+        res = es.bulk(operations=body, )
         logger.info(res)
         state.set_state(STATE_KEY, str(movies[-1].updated_at))
         # сохраняем последний фильм из ранее отсортированного по order by updated_at в хранилище
@@ -118,13 +118,17 @@ def save_movies(state: State) -> Generator[list[Movie], None, None]:
 
 if __name__ == '__main__':
     # start ElasticSearch
-    es = Elasticsearch(os.environ.get('ES_HOST_PORT'))
-    # make Index ElasticSearch
-    if not es.indices.exists(index='movies'):
-        with open('es_schema.json', 'r') as file:
-            data = json.load(file)
-            es.indices.create(index='movies', body=data)
-
+    try:
+        es = Elasticsearch(os.getenv('ES_HOST_PORT'))
+        # make Index ElasticSearch
+        if not es.indices.exists(index='movies'):
+            with open('es_schema.json', 'r') as file:
+                data = json.load(file)
+                es.indices.create(index='movies', body=data)
+    except Exception as error:
+        logger.info(
+            f'{error=}, {es.info=}, {es.graph=}, {es.health_report=}, {es.logstash=}, {es.watcher=}, {es.transport=}, {es.__doc__=}')
+    print('Start loading data to Elasticsearch')
     storage = JsonFileStorage(logger, 'storage.json')
 
     state = State(JsonFileStorage(logger=logger))  # инициализируется Класс State - сохраненное последнее состояние

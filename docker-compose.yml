@@ -9,37 +9,63 @@ services:
   #start POSTGRES Container
   postgres_dc:
     image: postgres:14.7
-    container_name: db_container
-    env_file: .postgres_dc_env
+    #    container_name: db_container
+    #    env_file: .postgres_dc_env
     environment:
-      TZ: "Europe/Moscow"
-      PGTZ: "Europe/Moscow"
+      - POSTGRES_USER=app
+      - POSTGRES_PASSWORD=123qwe
+      - POSTGRES_DB=movies_database
+      #      - POSTGRES_SCHEMA=content
+      - PGDATA=/var/lib/postgresql/data
+      - TZ="Europe/Moscow"
+      - PGTZ="Europe/Moscow"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
     networks:
       - my_net_1
 
+
+  #start ELASTICSEARCH Container
+  elastic_dc:
+    image: elasticsearch:8.6.2
+    #    container_name: elastic_container
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms200m -Xmx200m"
+    networks:
+      - my_net_1
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+
+
   #start DJANGO Container from Dockerfile
   backend:
     # Путь к Dockerfile для сервиса
     build: my_app
-    container_name: app_container
+    #    container_name: app_container
     volumes:
       - static_volume:/opt/my_app/static/
       - media_volume:/opt/my_app/media/
     # Порт, с которого сервис будет доступен на локальной машине
     environment:
       - DB_ENGINE=django.db.backends.postgresql
-      - DB_NAME=postgres
+      - DB_NAME=movies_database
+      - DB_USER=app
+      - DB_PASSWORD=123qwe
       - POSTGRES_USER=app
       - POSTGRES_PASSWORD=123qwe
       - DB_HOST=postgres_dc
       - DB_PORT=5432
     depends_on:
       - postgres_dc
+      - elastic_dc
     links:
-      - postgres_dc:postgres_dc
+      - postgres_dc
+      - elastic_dc
     networks:
       - my_net_1
 
@@ -49,7 +75,7 @@ services:
   #start NGINX Container
   nginx_dc:
     image: nginx:1.19.2
-    container_name: nginx_container
+    #    container_name: nginx_container
     #Прокидываем в Docker-контейнер конфигурацию для Nginx через volumes
     volumes:
       - ./etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
@@ -63,36 +89,30 @@ services:
       - my_net_1
 
 
-  #start SWAGGER Container
-  swagger_dc:
-    image: swaggerapi/swagger-ui
-    container_name: swagger_container
-    environment:
-      SWAGGER_JSON: /swagger.yaml
-    volumes:
-      - /home/gennady/PY_YANDEX/new_admin_panel_sprint_2/django_api/openapi.yaml:/swagger.yaml
-    depends_on:
-      - backend
-    networks:
-      - my_net_1
-
-  #start ELASTICSEARCH Container
-  elastic_dc:
-    image: elasticsearch:8.6.2
-    container_name: elastic_container
-    env_file: .elastic_dc_env
-    networks:
-      - my_net_1
-
   etl_dc:
     build: etl
-    container_name: etl_container
+    #    container_name: etl_container
     restart: always
+    environment:
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=movies_database
+      - DB_USER=app
+      - DB_PASSWORD=123qwe
+      - POSTGRES_USER=app
+      - POSTGRES_PASSWORD=123qwe
+      - POSTGRES_SCHEMA=content
+      - DB_HOST=postgres_dc
+      - DB_PORT=5432
     networks:
       - my_net_1
     depends_on:
-      - backend
       - postgres_dc
+      - elastic_dc
+      - backend
+    links:
+      - postgres_dc
+      - elastic_dc
+      - backend
 
 
 networks:
