@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-echo ">>>LOAD ELASTICSEARCH"
-python main.py
+#echo ">>>LOAD ELASTICSEARCH"
+#python main.py
 #docker exec sprint_3_1-etl_dc-1 python main.py #запуск через Bash внутри контейнера
 
 

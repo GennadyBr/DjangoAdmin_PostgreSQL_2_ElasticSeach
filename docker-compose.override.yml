@@ -8,6 +8,8 @@ services:
       - my_net_1
 
   backend:
+    ports:
+      - "8000:8000"
     networks:
       - my_net_1
 
