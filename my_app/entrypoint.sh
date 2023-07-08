@@ -24,8 +24,8 @@ echo ">>>LOAD DATA"
 cd sqlite_to_postgres
 python load_data.py
 
-#echo ">>>Start runserver"
-#cd ..
-#python manage.py runserver 0.0.0.0:8000
+echo ">>>Start runserver"
+cd ..
+python manage.py runserver 0.0.0.0:8000
 
-bash run_uwsgi.sh
+#bash run_uwsgi.sh

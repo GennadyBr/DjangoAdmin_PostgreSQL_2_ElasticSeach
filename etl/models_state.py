@@ -31,12 +31,14 @@ class JsonFileStorage(BaseStorage):
     def save_state(self, state: dict) -> None:
         """outfile - файл вывода"""
         with open(self.file_path, 'w') as outfile:
+            # запись в файл storage.json экземпляра state
             json.dump(state, outfile)
 
     def retrieve_state(self) -> dict:
         """json_file - файл ввода"""
         try:
             with open(self.file_path, 'r') as json_file:
+                # извлечение из файла storage.json экземпляра state
                 return json.load(json_file)
         except (FileNotFoundError, JSONDecodeError):
             self._logger.warning(
@@ -66,7 +68,7 @@ class State:
         return self.storage.retrieve_state().get(key)
 
 
-class Movie(BaseModel):
+class Base_Model(BaseModel):
     """
     Класс
     # BaseModel позволяет преобразовывать в JSON
