@@ -32,7 +32,7 @@ sql_query_movies = """
         LEFT JOIN content.person p ON p.id = pfw.person_id 
         LEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id 
         LEFT JOIN content.genre g ON g.id = gfw.genre_id 
-        WHERE fw.updated_at >= %s or p.updated_at >= %s OR g.updated_at >= %s
+        WHERE fw.updated_at >= %s
         GROUP BY fw.id 
         ORDER BY updated_at ASC
 """
@@ -66,7 +66,7 @@ sql_query_persons = """
         FROM content.person p 
         LEFT JOIN content.person_film_work pfw ON pfw.person_id = p.id 
         LEFT JOIN content.film_work fw ON fw.id = pfw.film_work_id 
-        WHERE fw.updated_at >= %s 
+        WHERE p.updated_at >= %s 
         GROUP BY p.id 
         ORDER BY updated_at ASC;
 """
@@ -122,7 +122,7 @@ def index_prep_genre(genre_sql):
             "name": genre_sql['name'],
             "description": genre_sql['description'],
             "created_at": genre_sql['created_at'],
-            "film_ids": genre_sql['film_ids'] #[act['film_id'] for act in genre_sql['film_ids']],
+            "film_ids": genre_sql['film_ids'].split(', ') #[act['film_id'] for act in genre_sql['film_ids']],
         },
         "updated_at": genre_sql['updated_at']
     }
@@ -137,7 +137,7 @@ def index_prep_person(person_sql):
             "id": str(person_sql['id']),
             "full_name": person_sql['full_name'],
             "created_at": person_sql['created_at'],
-            "film_ids": person_sql['film_ids'] #[act['film_id'] for act in person_sql['film_ids']],
+            "film_ids": person_sql['film_ids'].split(', ') #[act['film_id'] for act in person_sql['film_ids']],
         },
         "updated_at": person_sql['updated_at']
     }
@@ -159,9 +159,7 @@ def fetch_changed_movies(cur_movie, next_node_movies: Generator) -> Generator[da
         # сортируем order by updated_at что бы в следующий раз брать самую свежую запись
         # sql = 'SELECT * FROM content.film_work WHERE updated_at > %s order by updated_at asc'
         # logger.info('Fetching movies updated after %s', last_updated)
-        cur_movie.execute(query=sql_query_movies, params=(last_updated, last_updated, last_updated,))
-        # print('*M-CURSOR*' * 10)
-        # print('cur_movie=', cur_movie)
+        cur_movie.execute(query=sql_query_movies, params=(last_updated,))
         while results := cur_movie.fetchmany(size=100):  # передаем пачками
             next_node_movies.send(results)  # передаем следующую корутину
 
@@ -174,13 +172,10 @@ def transform_movies(next_node_movies: Generator) -> Generator[list[dict], None,
     # принимаем next_node корутину из предущего метода. Generator[list[dict] список из словарей
     while movie_dicts := (yield):
         batch = []
-        print('M' * 60)
         for movie_dict in movie_dicts:  # итерируем СПИСОК из словарей
             movie_dict_prep = index_prep_movie(movie_dict)  # трансформация данных
             movie = Base_Model(**movie_dict_prep)  # инициализируем BaseModel Класс Movie cо словарем как аргументом
             batch.append(movie)  # подготовка списка из Объектов Movie
-        # print('*M-TRANS*' * 10)
-        print('movie_dict=', movie_dicts)
         next_node_movies.send(batch)  # передаем следующий Список из Словарей (объект Movie)
 
 
@@ -190,6 +185,7 @@ def transform_movies(next_node_movies: Generator) -> Generator[list[dict], None,
                        requests.exceptions.ConnectionError))
 def save_movies(state: State) -> Generator[list[Base_Model], None, None]:
     # загрузка документов в индексы в ElasticSearch
+    # movies - Список из Словарей Объектов Base_Model
     while movies := (yield):
         body = []
         for movie in movies:
@@ -199,9 +195,10 @@ def save_movies(state: State) -> Generator[list[Base_Model], None, None]:
         logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
         res = es.bulk(operations=body, )
         logger.info(res)
+        print('**MOVIES**')
+        print('Q-ty of Movies inserted=', len(movies), 'list of movies', [m.doc['title'] for m in movies])
         state.set_state(STATE_KEY_MOVIES,
-                        str(movies[-1].updated_at))  # закоментил, что бы сработали корутины ЖАНРОВ и ПЕРСОН
-        # print('*M-SAVE*' * 10)
+                        str(movies[-1].updated_at))
         # сохраняем последний фильм из ранее отсортированного по order by updated_at в хранилище
         # если что-то упадет, то следующий раз начнем с этого фильма.
 
@@ -221,11 +218,7 @@ def fetch_changed_genres(cur_genre, next_node_genres: Generator) -> Generator[da
         cur_genre.execute(query=sql_query_genres, params=(last_updated,))
         # cursor.execute(sql_query_genres, (last_updated, last_updated, last_updated,))
         # while results := cursor.fetchmany(size=100):  # передаем пачками
-        # print('*G-CURSOR*' * 10)
-        # print('cur_genre=', cur_genre)
-        while results := cur_genre.fetchmany(size=5):  # передаем пачками
-            # print('*G-FETCH*' * 10)
-            # print('result', results)
+        while results := cur_genre.fetchmany(size=100):  # передаем пачками
             next_node_genres.send(results)  # передаем следующую корутину
 
 
@@ -237,16 +230,11 @@ def transform_genres(next_node_genres: Generator) -> Generator[list[dict], None,
     # принимаем next_node корутину из предущего метода. Generator[list[dict] список из словарей
     while genre_dicts := (yield):
         batch = []
-        print('G' * 60)
         for genre_dict in genre_dicts:  # итерируем СПИСОК из словарей
-            # print('G' * 60)
-            # print('BEFORE genre_dict=', genre_dict)
             genre_dict_prep = index_prep_genre(genre_dict)  # трансформация данных
-            print('AFTER genre_dict_prep=', genre_dict_prep)
             genre_model = Base_Model(
                 **genre_dict_prep)  # инициализируем BaseModel Класс Movie cо словарем как аргументом
             batch.append(genre_model)  # подготовка списка из Объектов Movie
-        # print('*G-TRANS*' * 10)
         next_node_genres.send(batch)  # передаем следующий Список из Словарей (объект Movie)
 
 
@@ -265,7 +253,8 @@ def save_genres(state: State) -> Generator[list[Base_Model], None, None]:
         logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
         res = es.bulk(operations=body, )
         logger.info(res)
-        # print('*G-SAVE*' * 10)
+        print('**GENRES**')
+        print('Q-ty of Genres inserted=', len(genre_dicts), 'list of genres', [g.doc['name'] for g in genre_dicts])
         state.set_state(STATE_KEY_GENRES, str(genre_dicts[-1].updated_at))
         # сохраняем последний фильм из ранее отсортированного по order by updated_at в хранилище
         # если что-то упадет, то следующий раз начнем с этого фильма.
@@ -285,8 +274,6 @@ def fetch_changed_persons(cur_person, next_node_persons: Generator) -> Generator
         # %s присылается из last_updated := (yield)
         cur_person.execute(query=sql_query_persons, params=(last_updated,))
         while results := cur_person.fetchmany(size=100):  # передаем пачками
-            # print('*P-FETCH*' * 10)
-            # print('result', results)
             next_node_persons.send(results)  # передаем следующую корутину
 
 
@@ -298,15 +285,11 @@ def transform_persons(next_node_persons: Generator) -> Generator[list[dict], Non
     # принимаем next_node корутину из предущего метода. Generator[list[dict] список из словарей
     while person_dicts := (yield):
         batch = []
-        print('P' * 60)
         for person_dict in person_dicts:  # итерируем СПИСОК из словарей
-            # print('BEFORE person_dict=', person_dict)
             person_dict_prep = index_prep_person(person_dict)  # трансформация данных
-            print('AFTER person_dict_prep=', person_dict_prep)
             person_model = Base_Model(
                 **person_dict_prep)  # инициализируем BaseModel Класс Movie cо словарем как аргументом
             batch.append(person_model)  # подготовка списка из Объектов Movie
-        # print('*P-TRANS*' * 10)
         next_node_persons.send(batch)  # передаем следующий Список из Словарей (объект Movie)
 
 
@@ -325,7 +308,8 @@ def save_persons(state: State) -> Generator[list[Base_Model], None, None]:
         logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
         res = es.bulk(operations=body, )
         logger.info(res)
-        # print('*P-SAVE*' * 10)
+        print('**PERSONS**')
+        print('Q-ty of Persons inserted=', len(person_dicts), 'list of person', [p.doc['full_name'] for p in person_dicts])
         state.set_state(STATE_KEY_PERSONS, str(person_dicts[-1].updated_at))
         # сохраняем последний фильм из ранее отсортированного по order by updated_at в хранилище
         # если что-то упадет, то следующий раз начнем с этого фильма.
@@ -413,6 +397,9 @@ if __name__ == '__main__':
 
             fetcher_coro_persons.send(
                 state.get_state(STATE_KEY_PERSONS) or str(datetime.min))  # запускаем первую корутину ПЕРСОН
-
+            print('**TIME**')
+            print('last date of updated movie', state.get_state(STATE_KEY_MOVIES))
+            print('last date of updated genre', state.get_state(STATE_KEY_GENRES))
+            print('last date of updated person', state.get_state(STATE_KEY_PERSONS))
             sleep(10)  # вечный цикл который ждет изменений в базе. С задержкой 10 сек
 
