@@ -52,12 +52,6 @@
         "type": "text",
         "analyzer": "ru_en"
       },
-      "created_at": {
-        "type": "text"
-      },
-      "updated_at": {
-        "type": "text"
-      },
       "film_ids": {
         "type": "text"
       }

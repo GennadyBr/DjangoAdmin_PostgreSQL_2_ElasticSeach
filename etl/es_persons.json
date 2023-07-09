@@ -48,14 +48,18 @@
       "full_name": {
         "type": "keyword"
       },
-      "created_at": {
-        "type": "text"
-      },
-      "updated_at": {
-        "type": "text"
-      },
-      "film_ids": {
-        "type": "text"
+      "films": {
+        "type": "nested",
+        "dynamic": "strict",
+        "properties": {
+          "film_id": {
+            "type": "keyword"
+          },
+          "role": {
+            "type": "text",
+            "analyzer": "ru_en"
+          }
+        }
       }
     }
   }
