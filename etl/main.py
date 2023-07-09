@@ -38,7 +38,7 @@ sql_query_movies = """
 """
 
 sql_query_genres = """
-        SELECT g.id, g.name, g.description, g.created_at, g.updated_at, 
+        SELECT g.id, g.name, g.description, g.updated_at, 
         STRING_AGG(DISTINCT fw.id::text, ', ') as film_ids 
         FROM content.genre g 
         LEFT JOIN content.genre_film_work gfw ON gfw.genre_id = g.id 
@@ -48,21 +48,9 @@ sql_query_genres = """
         ORDER BY updated_at ASC;
 """
 
-# sql_query_genres = """
-#         SELECT g.id, g.name, g.description,
-#         g.created_at, greatest(max(fw.updated_at), g.updated_at) as updated_at,
-#         COALESCE ( json_agg( distinct jsonb_build_object( 'film_id', fw.id ) ) FILTER (WHERE fw.id is not null), '[]' ) as film_ids
-#         FROM content.genre g
-#         LEFT JOIN content.genre_film_work gfw ON gfw.genre_id = g.id
-#         LEFT JOIN content.film_work fw ON fw.id = gfw.film_work_id
-#         WHERE fw.updated_at >= %s OR g.updated_at >= %s
-#         GROUP BY g.id
-#         ORDER BY updated_at ASC
-# """
-
 sql_query_persons = """
-        SELECT p.id, p.full_name, p.created_at, p.updated_at, 
-        STRING_AGG(DISTINCT fw.id::text, ', ') as film_ids 
+        SELECT p.id, p.full_name, p.updated_at, 
+        json_agg( distinct jsonb_build_object( 'film_id', pfw.film_work_id, 'role', pfw.role )) as film_ids 
         FROM content.person p 
         LEFT JOIN content.person_film_work pfw ON pfw.person_id = p.id 
         LEFT JOIN content.film_work fw ON fw.id = pfw.film_work_id 
@@ -70,17 +58,6 @@ sql_query_persons = """
         GROUP BY p.id 
         ORDER BY updated_at ASC;
 """
-
-# sql_query_persons = """
-#         SELECT p.id, p.full_name, p.created_at, greatest(max(fw.updated_at), p.updated_at) as updated_at,
-#         COALESCE ( json_agg( distinct jsonb_build_object( 'film_id', fw.id ) ) FILTER (WHERE fw.id is not null), '[]' ) as film_ids
-#         FROM content.person p
-#         LEFT JOIN content.person_film_work pfw ON pfw.person_id = p.id
-#         LEFT JOIN content.film_work fw ON fw.id = pfw.film_work_id
-#         WHERE fw.updated_at >= %s OR p.updated_at >= %s
-#         GROUP BY p.id
-#         ORDER BY updated_at ASC
-# """
 
 STATE_KEY_MOVIES = 'last_movies_updated'  # ключ в словаре хранилища состояний. последний обновленный фильм
 STATE_KEY_GENRES = 'last_genres_updated'  # ключ в словаре хранилища состояний. последний обновленный жанр
@@ -121,8 +98,7 @@ def index_prep_genre(genre_sql):
             "id": str(genre_sql['id']),
             "name": genre_sql['name'],
             "description": genre_sql['description'],
-            "created_at": genre_sql['created_at'],
-            "film_ids": genre_sql['film_ids'].split(', ') #[act['film_id'] for act in genre_sql['film_ids']],
+            "film_ids": genre_sql['film_ids'].split(', ')  # [act['film_id'] for act in genre_sql['film_ids']],
         },
         "updated_at": genre_sql['updated_at']
     }
@@ -136,8 +112,7 @@ def index_prep_person(person_sql):
         "doc": {
             "id": str(person_sql['id']),
             "full_name": person_sql['full_name'],
-            "created_at": person_sql['created_at'],
-            "film_ids": person_sql['film_ids'].split(', ') #[act['film_id'] for act in person_sql['film_ids']],
+            "films": person_sql['film_ids']  # .split(', ')  # [act['film_id'] for act in person_sql['film_ids']],
         },
         "updated_at": person_sql['updated_at']
     }
@@ -309,7 +284,9 @@ def save_persons(state: State) -> Generator[list[Base_Model], None, None]:
         res = es.bulk(operations=body, )
         logger.info(res)
         print('**PERSONS**')
-        print('Q-ty of Persons inserted=', len(person_dicts), 'list of person', [p.doc['full_name'] for p in person_dicts])
+        print('body=', body)
+        print('Q-ty of Persons inserted=', len(person_dicts), 'list of person',
+              [p.doc['full_name'] for p in person_dicts])
         state.set_state(STATE_KEY_PERSONS, str(person_dicts[-1].updated_at))
         # сохраняем последний фильм из ранее отсортированного по order by updated_at в хранилище
         # если что-то упадет, то следующий раз начнем с этого фильма.
@@ -402,4 +379,3 @@ if __name__ == '__main__':
             print('last date of updated genre', state.get_state(STATE_KEY_GENRES))
             print('last date of updated person', state.get_state(STATE_KEY_PERSONS))
             sleep(10)  # вечный цикл который ждет изменений в базе. С задержкой 10 сек
-
