@@ -11,11 +11,11 @@ class GenreAdmin(admin.ModelAdmin):
     # search_fields = ['question_GenreAdmin']
 
     # Отображение полей в списке
-    list_display = ('name', 'created_at', 'updated_at')
-    verbose_list_display = _('name'), _('created_at'), _('updated_at')
+    list_display = ('name', 'created', 'modified')
+    verbose_list_display = _('name'), _('created'), _('updated')
 
     # Фильтрация в списке
-    list_filter = ('created_at',)
+    list_filter = ('created',)
 
     # Поиск по полям
     search_fields = ('name', 'description', 'id')
@@ -26,10 +26,10 @@ class PersonAdmin(admin.ModelAdmin):
     # search_fields = ['question_PersonAdmin']
 
     # Отображение полей в списке
-    list_display = ('full_name', 'created_at', 'updated_at')
+    list_display = ('full_name', 'created', 'modified')
 
     # Фильтрация в списке
-    list_filter = ('created_at',)
+    list_filter = ('created',)
 
     # Поиск по полям
     search_fields = ('full_name', 'id')
@@ -63,7 +63,7 @@ class FilmworkAdmin(admin.ModelAdmin):
     # Отображение полей в списке
     get_genres.short_description = 'Жанры фильма'
     list_prefetch_related = ('genres',)
-    list_display = ('title', 'type', 'creation_date', 'get_genres', 'file_path', 'rating', 'created_at', 'updated_at',)
+    list_display = ('title', 'type', 'creation_date', 'get_genres', 'file_path', 'rating', 'created', 'modified',)
 
     # Фильтрация в списке
     list_filter = ('type',)

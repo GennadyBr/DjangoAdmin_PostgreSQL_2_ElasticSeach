@@ -19,4 +19,5 @@ RUN chmod +x *.sh
 # Скопируйте всё оставшееся. Для ускорения сборки образа эту команду стоит разместить ближе к концу файла.
 COPY . .
 
-ENTRYPOINT [ "bash", "./run_uwsgi.sh"]
+#ENTRYPOINT [ "bash", "./run_uwsgi.sh"]
+ENTRYPOINT [ "python", "main.py" ]

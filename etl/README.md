@@ -44,3 +44,12 @@
 - Поле `title` содержит внутри себя ещё одно поле — `title.raw`. Оно нужно, чтобы у Elasticsearch была возможность делать сортировку, так как он не умеет сортировать данные по типу `text`.
 
 Возможны и другие оптимизации, но для текущей задачи этих настроек будет достаточно.
+
+10/07/2023
+- исправлены названия ВСЕ полей "created_at" -> "created" и "updated_at" -> "modified"
+- в etl/Dockerfile добавлено ENTRYPOINT [ "python", "main.py" ]
+- исправлен genre person mapping elascticsearch "full_name": {"type": "keyword"} -> "full_name": {"type": "text", "analyzer": "ru_en"}
+- исправлен sql_query_movies WHERE fw.modified >= %s -> WHERE fw.modified > %s or p.modified > %s or g.modified > %s
+- исправлен sql_query_genres WHERE g.modified >= %s -> WHERE g.modified > %s
+- исправлен sql_query_persons WHERE p.modified >= %s -> WHERE p.modified > %s
+- убрал из main.py команды print и заменил на logger

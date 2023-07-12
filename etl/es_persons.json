@@ -46,7 +46,8 @@
         "type": "keyword"
       },
       "full_name": {
-        "type": "keyword"
+            "type": "text",
+            "analyzer": "ru_en"
       },
       "films": {
         "type": "nested",

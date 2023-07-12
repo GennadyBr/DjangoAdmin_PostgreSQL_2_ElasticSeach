@@ -11,17 +11,17 @@ class UU_ID_Mixin:
 
 
 @dataclass
-class Created_At_Mixin:
-    created_at: datetime
+class Created_Mixin:
+    created: datetime
 
 
 @dataclass
-class Updated_At_Mixin:
-    updated_at: datetime
+class Modified_Mixin:
+    modified: datetime
 
 
 @dataclass
-class Film_work_data_class(UU_ID_Mixin, Created_At_Mixin, Updated_At_Mixin):
+class Film_work_data_class(UU_ID_Mixin, Created_Mixin, Modified_Mixin):
     title: str
     description: str
     creation_date: datetime
@@ -31,24 +31,24 @@ class Film_work_data_class(UU_ID_Mixin, Created_At_Mixin, Updated_At_Mixin):
 
 
 @dataclass
-class Person_data_class(UU_ID_Mixin, Created_At_Mixin, Updated_At_Mixin):
+class Person_data_class(UU_ID_Mixin, Created_Mixin, Modified_Mixin):
     full_name: str
 
 
 @dataclass
-class Genre_data_class(UU_ID_Mixin, Created_At_Mixin, Updated_At_Mixin):
+class Genre_data_class(UU_ID_Mixin, Created_Mixin, Modified_Mixin):
     name: str
     description: str
 
 
 @dataclass
-class Genre_film_work_data_class(UU_ID_Mixin, Created_At_Mixin):
+class Genre_film_work_data_class(UU_ID_Mixin, Created_Mixin):
     genre_id: uuid4
     film_work_id: uuid4
 
 
 @dataclass
-class Person_film_work_data_class(UU_ID_Mixin, Created_At_Mixin):
+class Person_film_work_data_class(UU_ID_Mixin, Created_Mixin):
     film_work_id: uuid4
     person_id: uuid4
     role: str

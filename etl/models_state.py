@@ -75,4 +75,4 @@ class Base_Model(BaseModel):
     """
     index: Optional[dict] = {}
     doc: Optional[dict] = {}
-    updated_at: datetime
+    modified: datetime

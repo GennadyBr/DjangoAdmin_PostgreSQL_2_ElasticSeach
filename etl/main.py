@@ -23,7 +23,7 @@ load_dotenv()
 
 sql_query_movies = """
         SELECT fw.id, fw.title, fw.description, fw.rating, fw.type,
-        fw.created_at, greatest(fw.updated_at, max(p.updated_at), max(g.updated_at)) as updated_at, 
+        fw.created, greatest(fw.modified, max(p.modified), max(g.modified)) as modified, 
         COALESCE ( json_agg( distinct jsonb_build_object( 'person_role', pfw.role, 'person_id', p.id, 
         'person_name', p.full_name ) ) FILTER (WHERE p.id is not null), '[]' ) as persons, 
         array_agg(DISTINCT g.name) as genres 
@@ -32,31 +32,31 @@ sql_query_movies = """
         LEFT JOIN content.person p ON p.id = pfw.person_id 
         LEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id 
         LEFT JOIN content.genre g ON g.id = gfw.genre_id 
-        WHERE fw.updated_at >= %s
+        WHERE fw.modified > %s or p.modified > %s or g.modified > %s
         GROUP BY fw.id 
-        ORDER BY updated_at ASC
+        ORDER BY modified ASC
 """
 
 sql_query_genres = """
-        SELECT g.id, g.name, g.description, g.updated_at, 
+        SELECT g.id, g.name, g.description, g.modified, 
         STRING_AGG(DISTINCT fw.id::text, ', ') as film_ids 
         FROM content.genre g 
         LEFT JOIN content.genre_film_work gfw ON gfw.genre_id = g.id 
         LEFT JOIN content.film_work fw ON fw.id = gfw.film_work_id 
-        WHERE g.updated_at >= %s 
+        WHERE g.modified > %s 
         GROUP BY g.id 
-        ORDER BY updated_at ASC;
+        ORDER BY modified ASC;
 """
 
 sql_query_persons = """
-        SELECT p.id, p.full_name, p.updated_at, 
+        SELECT p.id, p.full_name, p.modified, 
         json_agg( distinct jsonb_build_object( 'film_id', pfw.film_work_id, 'role', pfw.role )) as film_ids 
         FROM content.person p 
         LEFT JOIN content.person_film_work pfw ON pfw.person_id = p.id 
         LEFT JOIN content.film_work fw ON fw.id = pfw.film_work_id 
-        WHERE p.updated_at >= %s 
+        WHERE p.modified > %s 
         GROUP BY p.id 
-        ORDER BY updated_at ASC;
+        ORDER BY modified ASC;
 """
 
 STATE_KEY_MOVIES = 'last_movies_updated'  # ключ в словаре хранилища состояний. последний обновленный фильм
@@ -85,7 +85,7 @@ def index_prep_movie(movie):
             "writers": [dict(id=act['person_id'], name=act['person_name']) for act in movie['persons'] if
                         act['person_role'] == 'writer' or act['person_role'] == 'WR'],
         },
-        "updated_at": movie['updated_at']
+        "modified": movie['modified']
     }
     return movie_dict_res
 
@@ -100,7 +100,7 @@ def index_prep_genre(genre_sql):
             "description": genre_sql['description'],
             "film_ids": genre_sql['film_ids'].split(', ')  # [act['film_id'] for act in genre_sql['film_ids']],
         },
-        "updated_at": genre_sql['updated_at']
+        "modified": genre_sql['modified']
     }
     return genre_dict_res
 
@@ -114,7 +114,7 @@ def index_prep_person(person_sql):
             "full_name": person_sql['full_name'],
             "films": person_sql['film_ids']  # .split(', ')  # [act['film_id'] for act in person_sql['film_ids']],
         },
-        "updated_at": person_sql['updated_at']
+        "modified": person_sql['modified']
     }
     return person_dict_res
 
@@ -128,13 +128,11 @@ def index_prep_person(person_sql):
 def fetch_changed_movies(cur_movie, next_node_movies: Generator) -> Generator[datetime, None, None]:
     while last_updated := (yield):  # yield принимаем datetime
         # логгер
-        logger.info(f'Fetching movies changed after ' f'{last_updated}')
-        # выбираем все фильмы где updated_at больше значения %s
+        logger.info(f'Fetching MOVIES changed after ' f'{last_updated}')
+        # выбираем все фильмы где modified больше значения %s
         # %s присылается из last_updated := (yield)
-        # сортируем order by updated_at что бы в следующий раз брать самую свежую запись
-        # sql = 'SELECT * FROM content.film_work WHERE updated_at > %s order by updated_at asc'
-        # logger.info('Fetching movies updated after %s', last_updated)
-        cur_movie.execute(query=sql_query_movies, params=(last_updated,))
+        # сортируем order by modified что бы в следующий раз брать самую свежую запись
+        cur_movie.execute(query=sql_query_movies, params=(last_updated, last_updated, last_updated,))
         while results := cur_movie.fetchmany(size=100):  # передаем пачками
             next_node_movies.send(results)  # передаем следующую корутину
 
@@ -167,14 +165,15 @@ def save_movies(state: State) -> Generator[list[Base_Model], None, None]:
             index_dict = {'index': movie.index}
             body.append(index_dict)
             body.append(movie.doc)  #
-        logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
+        # logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
         res = es.bulk(operations=body, )
-        logger.info(res)
-        print('**MOVIES**')
-        print('Q-ty of Movies inserted=', len(movies), 'list of movies', [m.doc['title'] for m in movies])
+        # logger.info(res)
+        logger.info('**MOVIES**')
+        logger.info(f'Q-ty of Movies inserted= {len(movies)}')
+        logger.info(f'List of movies {[m.doc["title"] for m in movies]}')
         state.set_state(STATE_KEY_MOVIES,
-                        str(movies[-1].updated_at))
-        # сохраняем последний фильм из ранее отсортированного по order by updated_at в хранилище
+                        str(movies[-1].modified))
+        # сохраняем последний фильм из ранее отсортированного по order by modified в хранилище
         # если что-то упадет, то следующий раз начнем с этого фильма.
 
 
@@ -187,8 +186,8 @@ def save_movies(state: State) -> Generator[list[Base_Model], None, None]:
 def fetch_changed_genres(cur_genre, next_node_genres: Generator) -> Generator[datetime, None, None]:
     while last_updated := (yield):  # yield принимаем datetime
         # логгер
-        logger.info(f'Fetching genres changed after ' f'{last_updated}')
-        # выбираем все жанры где updated_at больше значения %s
+        logger.info(f'Fetching GENRES changed after ' f'{last_updated}')
+        # выбираем все жанры где modified больше значения %s
         # %s присылается из last_updated := (yield)
         cur_genre.execute(query=sql_query_genres, params=(last_updated,))
         # cursor.execute(sql_query_genres, (last_updated, last_updated, last_updated,))
@@ -225,13 +224,14 @@ def save_genres(state: State) -> Generator[list[Base_Model], None, None]:
             index_dict = {'index': genre_model.index}
             body.append(index_dict)
             body.append(genre_model.doc)  #
-        logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
+        # logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
         res = es.bulk(operations=body, )
-        logger.info(res)
-        print('**GENRES**')
-        print('Q-ty of Genres inserted=', len(genre_dicts), 'list of genres', [g.doc['name'] for g in genre_dicts])
-        state.set_state(STATE_KEY_GENRES, str(genre_dicts[-1].updated_at))
-        # сохраняем последний фильм из ранее отсортированного по order by updated_at в хранилище
+        # logger.info(res)
+        logger.info('**GENRES**')
+        logger.info(f'Q-ty of Genres inserted= {len(genre_dicts)}')
+        logger.info(f'List of genres: {[g.doc["name"] for g in genre_dicts]}')
+        state.set_state(STATE_KEY_GENRES, str(genre_dicts[-1].modified))
+        # сохраняем последний фильм из ранее отсортированного по order by modified в хранилище
         # если что-то упадет, то следующий раз начнем с этого фильма.
 
 
@@ -244,8 +244,8 @@ def save_genres(state: State) -> Generator[list[Base_Model], None, None]:
 def fetch_changed_persons(cur_person, next_node_persons: Generator) -> Generator[datetime, None, None]:
     while last_updated := (yield):  # yield принимаем datetime
         # логгер
-        logger.info(f'Fetching persons changed after ' f'{last_updated}')
-        # выбираем все жанры где updated_at больше значения %s
+        logger.info(f'Fetching PERSONS changed after ' f'{last_updated}')
+        # выбираем все жанры где modified больше значения %s
         # %s присылается из last_updated := (yield)
         cur_person.execute(query=sql_query_persons, params=(last_updated,))
         while results := cur_person.fetchmany(size=100):  # передаем пачками
@@ -280,15 +280,14 @@ def save_persons(state: State) -> Generator[list[Base_Model], None, None]:
             index_dict = {'index': person_model.index}
             body.append(index_dict)
             body.append(person_model.doc)  #
-        logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
+        # logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
         res = es.bulk(operations=body, )
-        logger.info(res)
-        print('**PERSONS**')
-        print('body=', body)
-        print('Q-ty of Persons inserted=', len(person_dicts), 'list of person',
-              [p.doc['full_name'] for p in person_dicts])
-        state.set_state(STATE_KEY_PERSONS, str(person_dicts[-1].updated_at))
-        # сохраняем последний фильм из ранее отсортированного по order by updated_at в хранилище
+        # logger.info(res)
+        logger.info('**PERSONS**')
+        logger.info(f'Q-ty of Persons inserted= {len(person_dicts)}')
+        logger.info(f'List of genres: {[g.doc["full_name"] for g in person_dicts]}')
+        state.set_state(STATE_KEY_PERSONS, str(person_dicts[-1].modified))
+        # сохраняем последний фильм из ранее отсортированного по order by modified в хранилище
         # если что-то упадет, то следующий раз начнем с этого фильма.
 
 
@@ -310,7 +309,7 @@ if __name__ == '__main__':
         logger.info(
             f'{error=}, {es.info=}, {es.graph=}, {es.health_report=}, {es.logstash=}, {es.watcher=}, {es.transport=}, {es.__doc__=}')
 
-    print('Start loading data to Elasticsearch')
+    logger.info('Start loading data to Elasticsearch')
     storage = JsonFileStorage(logger, 'storage.json')
     state = State(JsonFileStorage(logger=logger))  # инициализируется Класс State - сохраненное последнее состояние
 
@@ -374,8 +373,8 @@ if __name__ == '__main__':
 
             fetcher_coro_persons.send(
                 state.get_state(STATE_KEY_PERSONS) or str(datetime.min))  # запускаем первую корутину ПЕРСОН
-            print('**TIME**')
-            print('last date of updated movie', state.get_state(STATE_KEY_MOVIES))
-            print('last date of updated genre', state.get_state(STATE_KEY_GENRES))
-            print('last date of updated person', state.get_state(STATE_KEY_PERSONS))
+            logger.info('**TIME**')
+            logger.info(f'last date of updated movie, {state.get_state(STATE_KEY_MOVIES)}')
+            logger.info(f'last date of updated genre, {state.get_state(STATE_KEY_GENRES)}')
+            logger.info(f'last date of updated person, {state.get_state(STATE_KEY_PERSONS)}')
             sleep(10)  # вечный цикл который ждет изменений в базе. С задержкой 10 сек

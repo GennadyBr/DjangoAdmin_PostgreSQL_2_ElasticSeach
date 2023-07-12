@@ -8,9 +8,9 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 class TimeStampedMixin(models.Model):
     # auto_now_add автоматически выставит дату создания записи
-    created_at = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
     # auto_now изменятся при каждом обновлении записи
-    updated_at = models.DateTimeField(auto_now=True)
+    modified = models.DateTimeField(auto_now=True)
 
     class Meta:
         # Этот параметр указывает Django, что этот класс не является представлением таблицы
@@ -27,7 +27,7 @@ class UUIDMixin(models.Model):
 class GenreFilmwork(UUIDMixin):
     film_work = models.ForeignKey('Filmwork', on_delete=models.CASCADE)
     genre = models.ForeignKey('Genre', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "content\".\"genre_film_work"
@@ -49,7 +49,7 @@ class PersonFilmwork(UUIDMixin):
         default=Role.ACTOR,
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "content\".\"person_film_work"
