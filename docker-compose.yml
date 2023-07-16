@@ -93,7 +93,7 @@ services:
   etl_dc:
     build: etl
     #    container_name: etl_container
-    restart: always
+#    restart: always
     environment:
       - DB_ENGINE=django.db.backends.postgresql
       - DB_NAME=movies_database

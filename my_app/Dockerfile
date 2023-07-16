@@ -40,6 +40,7 @@ RUN chmod +x *.sh
 
 # Скопируйте всё оставшееся. Для ускорения сборки образа эту команду стоит разместить ближе к концу файла.
 COPY entrypoint.sh entrypoint.sh
+COPY data/index.html /opt/my_app/static/index.html
 COPY . .
 
 ENTRYPOINT [ "bash", "./entrypoint.sh"]

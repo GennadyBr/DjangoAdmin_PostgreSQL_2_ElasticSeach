@@ -22,9 +22,9 @@ README.md
 /etl/main_old.py
 /etl/try_helpers.bulk.py
 /etl/try_bulk.py
-/etl/ETLTests-2.json
+/etl/jsons/ETLTests-2.json
 /etl/logs/
-/etl/storage.json
+/etl/jsons/storage.json
 /.postgres_dc_env
 /my_app/test.log
 /my_app/tests/test.log

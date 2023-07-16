@@ -1,13 +1,14 @@
 import os
 import json
+from typing import Generator
 
 import backoff
 import psycopg
-import requests
 
 from time import sleep
 from datetime import datetime
-from typing import Generator
+
+import requests
 from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 from psycopg import ServerCursor
@@ -15,201 +16,21 @@ from psycopg.conninfo import make_conninfo
 from psycopg.rows import dict_row
 
 from decorators import coroutine
-from logger import logger
+from helpers.logger import logger
 from settings import database_settings
-from models_state import JsonFileStorage, State, Base_Model, BaseStorage
+from jsons.models_state import JsonFileStorage, State, Base_Model
+from extractors.genres_extractor import fetch_changed_genres
+from extractors.movies_extractor import fetch_changed_movies
+from extractors.persons_extractor import fetch_changed_persons
+from transformers.genres_transformer import transform_genres
+from transformers.movies_transformer import transform_movies
+from transformers.persons_transformer import transform_persons
 
 load_dotenv()
-
-sql_query_movies = """
-        SELECT fw.id, fw.title, fw.description, fw.rating, fw.type,
-        fw.created, greatest(fw.modified, max(p.modified), max(g.modified)) as modified, 
-        COALESCE ( json_agg( distinct jsonb_build_object( 'person_role', pfw.role, 'person_id', p.id, 
-        'person_name', p.full_name ) ) FILTER (WHERE p.id is not null), '[]' ) as persons, 
-        array_agg(DISTINCT g.name) as genres 
-        FROM content.film_work fw 
-        LEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id 
-        LEFT JOIN content.person p ON p.id = pfw.person_id 
-        LEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id 
-        LEFT JOIN content.genre g ON g.id = gfw.genre_id 
-        WHERE fw.modified > %s or p.modified > %s or g.modified > %s
-        GROUP BY fw.id 
-        ORDER BY modified ASC
-"""
-
-sql_query_genres = """
-        SELECT g.id, g.name, g.description, g.modified, 
-        STRING_AGG(DISTINCT fw.id::text, ', ') as film_ids 
-        FROM content.genre g 
-        LEFT JOIN content.genre_film_work gfw ON gfw.genre_id = g.id 
-        LEFT JOIN content.film_work fw ON fw.id = gfw.film_work_id 
-        WHERE g.modified > %s 
-        GROUP BY g.id 
-        ORDER BY modified ASC;
-"""
-
-sql_query_persons = """
-        SELECT p.id, p.full_name, p.modified, 
-        json_agg( distinct jsonb_build_object( 'film_id', pfw.film_work_id, 'role', pfw.role )) as film_ids 
-        FROM content.person p 
-        LEFT JOIN content.person_film_work pfw ON pfw.person_id = p.id 
-        LEFT JOIN content.film_work fw ON fw.id = pfw.film_work_id 
-        WHERE p.modified > %s 
-        GROUP BY p.id 
-        ORDER BY modified ASC;
-"""
 
 STATE_KEY_MOVIES = 'last_movies_updated'  # ключ в словаре хранилища состояний. последний обновленный фильм
 STATE_KEY_GENRES = 'last_genres_updated'  # ключ в словаре хранилища состояний. последний обновленный жанр
 STATE_KEY_PERSONS = 'last_persons_updated'  # ключ в словаре хранилища состояний. последний обновленный жанр
-
-
-def index_prep_movie(movie):
-    """формирование индекса"""
-    movie_dict_res = {
-        "index": {"_index": "movies", "_id": str(movie['id'])},
-        "doc": {
-            "id": str(movie['id']),
-            "imdb_rating": movie['rating'],
-            "genre": [g for g in movie['genres']],
-            "title": movie['title'],
-            "description": movie['description'],
-            "director": ','.join([act['person_name'] for act in movie['persons'] if
-                                  act['person_role'] == 'director' or act['person_role'] == 'DR']),
-            "actors_names": [act['person_name'] for act in movie['persons'] if
-                             act['person_role'] == 'actor' or act['person_role'] == 'AC'],
-            "writers_names": [act['person_name'] for act in movie['persons'] if
-                              act['person_role'] == 'writer' or act['person_role'] == 'WR'],
-            "actors": [dict(id=act['person_id'], name=act['person_name']) for act in movie['persons'] if
-                       act['person_role'] == 'actor' or act['person_role'] == 'AC'],
-            "writers": [dict(id=act['person_id'], name=act['person_name']) for act in movie['persons'] if
-                        act['person_role'] == 'writer' or act['person_role'] == 'WR'],
-        },
-        "modified": movie['modified']
-    }
-    return movie_dict_res
-
-
-def index_prep_genre(genre_sql):
-    """формирование индекса"""
-    genre_dict_res = {
-        "index": {"_index": "genres", "_id": str(genre_sql['id'])},
-        "doc": {
-            "id": str(genre_sql['id']),
-            "name": genre_sql['name'],
-            "description": genre_sql['description'],
-            "film_ids": genre_sql['film_ids'].split(', ')  # [act['film_id'] for act in genre_sql['film_ids']],
-        },
-        "modified": genre_sql['modified']
-    }
-    return genre_dict_res
-
-
-def index_prep_person(person_sql):
-    """формирование индекса"""
-    person_dict_res = {
-        "index": {"_index": "persons", "_id": str(person_sql['id'])},
-        "doc": {
-            "id": str(person_sql['id']),
-            "full_name": person_sql['full_name'],
-            "films": person_sql['film_ids']  # .split(', ')  # [act['film_id'] for act in person_sql['film_ids']],
-        },
-        "modified": person_sql['modified']
-    }
-    return person_dict_res
-
-
-####################################################################
-# КОРУТИНЫ ФИЛЬМОВ
-####################################################################
-# этой корутине передаем курсор, который получаем из базы ОДИН раз.
-# не тратим ресурсы на получение курсора каждый раз
-@coroutine
-def fetch_changed_movies(cur_movie, next_node_movies: Generator) -> Generator[datetime, None, None]:
-    while last_updated := (yield):  # yield принимаем datetime
-        # логгер
-        logger.info(f'Fetching MOVIES changed after ' f'{last_updated}')
-        # выбираем все фильмы где modified больше значения %s
-        # %s присылается из last_updated := (yield)
-        # сортируем order by modified что бы в следующий раз брать самую свежую запись
-        cur_movie.execute(query=sql_query_movies, params=(last_updated, last_updated, last_updated,))
-        while results := cur_movie.fetchmany(size=100):  # передаем пачками
-            next_node_movies.send(results)  # передаем следующую корутину
-
-
-@coroutine
-@backoff.on_exception(backoff.expo,
-                      (requests.exceptions.Timeout,
-                       requests.exceptions.ConnectionError))
-def transform_movies(next_node_movies: Generator) -> Generator[list[dict], None, None]:
-    # принимаем next_node корутину из предущего метода. Generator[list[dict] список из словарей
-    while movie_dicts := (yield):
-        batch = []
-        for movie_dict in movie_dicts:  # итерируем СПИСОК из словарей
-            movie_dict_prep = index_prep_movie(movie_dict)  # трансформация данных
-            movie = Base_Model(**movie_dict_prep)  # инициализируем BaseModel Класс Movie cо словарем как аргументом
-            batch.append(movie)  # подготовка списка из Объектов Movie
-        next_node_movies.send(batch)  # передаем следующий Список из Словарей (объект Movie)
-
-
-@coroutine
-@backoff.on_exception(backoff.expo,
-                      (requests.exceptions.Timeout,
-                       requests.exceptions.ConnectionError))
-def save_movies(state: State) -> Generator[list[Base_Model], None, None]:
-    # загрузка документов в индексы в ElasticSearch
-    # movies - Список из Словарей Объектов Base_Model
-    while movies := (yield):
-        body = []
-        for movie in movies:
-            index_dict = {'index': movie.index}
-            body.append(index_dict)
-            body.append(movie.doc)  #
-        # logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
-        res = es.bulk(operations=body, )
-        # logger.info(res)
-        logger.info('**MOVIES**')
-        logger.info(f'Q-ty of Movies inserted= {len(movies)}')
-        logger.info(f'List of movies {[m.doc["title"] for m in movies]}')
-        state.set_state(STATE_KEY_MOVIES,
-                        str(movies[-1].modified))
-        # сохраняем последний фильм из ранее отсортированного по order by modified в хранилище
-        # если что-то упадет, то следующий раз начнем с этого фильма.
-
-
-####################################################################
-# КОРУТИНЫ ЖАНРОВ
-####################################################################
-# этой корутине передаем курсор, который получаем из базы ОДИН раз.
-# не тратим ресурсы на получение курсора каждый раз
-@coroutine
-def fetch_changed_genres(cur_genre, next_node_genres: Generator) -> Generator[datetime, None, None]:
-    while last_updated := (yield):  # yield принимаем datetime
-        # логгер
-        logger.info(f'Fetching GENRES changed after ' f'{last_updated}')
-        # выбираем все жанры где modified больше значения %s
-        # %s присылается из last_updated := (yield)
-        cur_genre.execute(query=sql_query_genres, params=(last_updated,))
-        # cursor.execute(sql_query_genres, (last_updated, last_updated, last_updated,))
-        # while results := cursor.fetchmany(size=100):  # передаем пачками
-        while results := cur_genre.fetchmany(size=100):  # передаем пачками
-            next_node_genres.send(results)  # передаем следующую корутину
-
-
-@coroutine
-@backoff.on_exception(backoff.expo,
-                      (requests.exceptions.Timeout,
-                       requests.exceptions.ConnectionError))
-def transform_genres(next_node_genres: Generator) -> Generator[list[dict], None, None]:
-    # принимаем next_node корутину из предущего метода. Generator[list[dict] список из словарей
-    while genre_dicts := (yield):
-        batch = []
-        for genre_dict in genre_dicts:  # итерируем СПИСОК из словарей
-            genre_dict_prep = index_prep_genre(genre_dict)  # трансформация данных
-            genre_model = Base_Model(
-                **genre_dict_prep)  # инициализируем BaseModel Класс Movie cо словарем как аргументом
-            batch.append(genre_model)  # подготовка списка из Объектов Movie
-        next_node_genres.send(batch)  # передаем следующий Список из Словарей (объект Movie)
 
 
 @coroutine
@@ -235,37 +56,29 @@ def save_genres(state: State) -> Generator[list[Base_Model], None, None]:
         # если что-то упадет, то следующий раз начнем с этого фильма.
 
 
-####################################################################
-# КОРУТИНЫ ПЕРСОН
-####################################################################
-# этой корутине передаем курсор, который получаем из базы ОДИН раз.
-# не тратим ресурсы на получение курсора каждый раз
-@coroutine
-def fetch_changed_persons(cur_person, next_node_persons: Generator) -> Generator[datetime, None, None]:
-    while last_updated := (yield):  # yield принимаем datetime
-        # логгер
-        logger.info(f'Fetching PERSONS changed after ' f'{last_updated}')
-        # выбираем все жанры где modified больше значения %s
-        # %s присылается из last_updated := (yield)
-        cur_person.execute(query=sql_query_persons, params=(last_updated,))
-        while results := cur_person.fetchmany(size=100):  # передаем пачками
-            next_node_persons.send(results)  # передаем следующую корутину
-
-
 @coroutine
 @backoff.on_exception(backoff.expo,
                       (requests.exceptions.Timeout,
                        requests.exceptions.ConnectionError))
-def transform_persons(next_node_persons: Generator) -> Generator[list[dict], None, None]:
-    # принимаем next_node корутину из предущего метода. Generator[list[dict] список из словарей
-    while person_dicts := (yield):
-        batch = []
-        for person_dict in person_dicts:  # итерируем СПИСОК из словарей
-            person_dict_prep = index_prep_person(person_dict)  # трансформация данных
-            person_model = Base_Model(
-                **person_dict_prep)  # инициализируем BaseModel Класс Movie cо словарем как аргументом
-            batch.append(person_model)  # подготовка списка из Объектов Movie
-        next_node_persons.send(batch)  # передаем следующий Список из Словарей (объект Movie)
+def save_movies(state: State) -> Generator[list[Base_Model], None, None]:
+    # загрузка документов в индексы в ElasticSearch
+    # movies - Список из Словарей Объектов Base_Model
+    while movies := (yield):
+        body = []
+        for movie in movies:
+            index_dict = {'index': movie.index}
+            body.append(index_dict)
+            body.append(movie.doc)  #
+        # logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
+        res = es.bulk(operations=body, )
+        # logger.info(res)
+        logger.info('**MOVIES**')
+        logger.info(f'Q-ty of Movies inserted= {len(movies)}')
+        logger.info(f'List of movies {[m.doc["title"] for m in movies]}')
+        state.set_state(STATE_KEY_MOVIES,
+                        str(movies[-1].modified))
+        # сохраняем последний фильм из ранее отсортированного по order by modified в хранилище
+        # если что-то упадет, то следующий раз начнем с этого фильма.
 
 
 @coroutine
@@ -300,6 +113,13 @@ if __name__ == '__main__':
         # перебор по 3м индексам и файлам из словаря es_index_json_file
         for index_name in es_index_json_file:
             es = Elasticsearch(os.getenv('ES_HOST_PORT'))
+            # waiting for ElasticSearch Ping
+            while True:
+                if es.ping():
+                    break
+                print('*****waiting for ElasticSearch Ping*****')
+                sleep(1)
+
             # make Index ElasticSearch
             if not es.indices.exists(index=index_name):
                 with open(es_index_json_file[index_name], 'r') as file:
@@ -310,7 +130,7 @@ if __name__ == '__main__':
             f'{error=}, {es.info=}, {es.graph=}, {es.health_report=}, {es.logstash=}, {es.watcher=}, {es.transport=}, {es.__doc__=}')
 
     logger.info('Start loading data to Elasticsearch')
-    storage = JsonFileStorage(logger, 'storage.json')
+    storage = JsonFileStorage(logger, 'jsons/storage.json')
     state = State(JsonFileStorage(logger=logger))  # инициализируется Класс State - сохраненное последнее состояние
 
     dsn = make_conninfo(**database_settings.dict())  # Merge a string and keyword params into a single conninfo string

@@ -9,7 +9,7 @@ ENV ALLOWED_HOSTS ["postgres_dc", "*", "127.0.0.1", "localhost", "elastic_dc"]
 
 # Скопируйте в контейнер файлы, которые редко меняются
 COPY requirements.txt requirements.txt
-COPY run_uwsgi.sh run_uwsgi.sh
+COPY uwsgi/run_uwsgi.sh run_uwsgi.sh
 COPY uwsgi/uwsgi.ini uwsgi.ini
 
 # Установите зависимости
