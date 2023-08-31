@@ -6,61 +6,35 @@ volumes:
   media_volume:
 
 services:
-  #start POSTGRES Container
   postgres_dc:
     image: postgres:14.7
-    #    container_name: db_container
-    #    env_file: .postgres_dc_env
-    environment:
-      - POSTGRES_USER=app
-      - POSTGRES_PASSWORD=123qwe
-      - POSTGRES_DB=movies_database
-      #      - POSTGRES_SCHEMA=content
-      - PGDATA=/var/lib/postgresql/data
-#      - TZ="Europe/Moscow"
-#      - PGTZ="Europe/Moscow"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: always
+    env_file:
+      - .env
     networks:
       - my_net_1
 
 
-  #start ELASTICSEARCH Container
   elastic_dc:
     image: elasticsearch:8.6.2
-    #    container_name: elastic_container
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms200m -Xmx200m"
     networks:
       - my_net_1
-#    ulimits:
-#      memlock:
-#        soft: -1
-#        hard: -1
 
 
-  #start DJANGO Container from Dockerfile
   backend:
-    # Путь к Dockerfile для сервиса
     build: my_app
-    #    container_name: app_container
     volumes:
       - static_volume:/opt/my_app/static/
       - media_volume:/opt/my_app/media/
-    # Порт, с которого сервис будет доступен на локальной машине
-    environment:
-      - DB_ENGINE=django.db.backends.postgresql
-      - DB_NAME=movies_database
-      - DB_USER=app
-      - DB_PASSWORD=123qwe
-      - POSTGRES_USER=app
-      - POSTGRES_PASSWORD=123qwe
-      - DB_HOST=postgres_dc
-      - DB_PORT=5432
+    env_file:
+      - .env
     depends_on:
       - postgres_dc
       - elastic_dc
@@ -70,14 +44,8 @@ services:
     networks:
       - my_net_1
 
-  # у вас есть некий сервис, который собирается через Dockerfile и отдаёт 8000-й порт.
-  # К нему нужно присоединить Nginx, который будет обрабатывать соединения на 80-м порту
-
-  #start NGINX Container
   nginx_dc:
     image: nginx:1.19.2
-    #    container_name: nginx_container
-    #Прокидываем в Docker-контейнер конфигурацию для Nginx через volumes
     volumes:
       - ./etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./etc/nginx/conf.d:/etc/nginx/conf.d:ro
@@ -92,18 +60,9 @@ services:
 
   etl_dc:
     build: etl
-    #    container_name: etl_container
     restart: always
-    environment:
-      - DB_ENGINE=django.db.backends.postgresql
-      - DB_NAME=movies_database
-      - DB_USER=app
-      - DB_PASSWORD=123qwe
-      - POSTGRES_USER=app
-      - POSTGRES_PASSWORD=123qwe
-      - POSTGRES_SCHEMA=content
-      - DB_HOST=postgres_dc
-      - DB_PORT=5432
+    env_file:
+      - .env
     networks:
       - my_net_1
     depends_on:

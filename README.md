@@ -2,16 +2,17 @@
 [Ссылка на проект](https://github.com/KarinaSmirnova/Async_API_sprint_1)
 
 ## start
+.env файл присутствует в учебных целях
 docker compose up --build
 
 ## Django
 http://localhost:8000/
-http://localhost:8000/admin/movies/filmwork/
-http://localhost:8000/admin/movies/person/
-http://localhost:8000/admin/movies/genre/
 
 ## Django admin
 http://localhost:8000/admin
+http://localhost:8000/admin/movies/filmwork/
+http://localhost:8000/admin/movies/person/
+http://localhost:8000/admin/movies/genre/
 
 ## API
 http://127.0.0.1:8000/api/v1/movies/

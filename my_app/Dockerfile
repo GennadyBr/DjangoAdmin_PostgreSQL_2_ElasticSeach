@@ -1,5 +1,5 @@
 # Укажите необходимую версию python
-FROM python:3.10.2-buster
+FROM python:3.11
 
 # Выберите папку, в которой будут размещаться файлы проекта внутри контейнера
 WORKDIR /opt/my_app
@@ -14,10 +14,10 @@ ENV PYTHONUNBUFFERED 1
 ENV UWSGI_PROCESSES 1
 ENV UWSGI_THREADS 16
 ENV UWSGI_HARAKIRI 240
-#ENV ALLOWED_HOSTS ['DJANGO_ALLOWED_HOSTS']
 ENV ALLOWED_HOSTS ["postgres_dc", "*", "127.0.0.1", "localhost", "elastic_dc"]
 
-RUN apt update && apt install -y netcat
+RUN apt-get update && apt-get install -y apt-transport-https
+RUN apt install netcat-traditional
 
 RUN apt update && \
 apt install -y vim && \
