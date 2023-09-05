@@ -1,4 +1,4 @@
-# Films Django API, Django Admin, ETL, Elasticsearch
+# Films Django API, Django Admin, ETL SQLite -> Postgres, Elasticsearch, Docker, NGINX
 [Ссылка на проект](https://github.com/KarinaSmirnova/Async_API_sprint_1)
 
 ## start
