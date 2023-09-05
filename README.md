@@ -3,6 +3,7 @@
 
 ## start
 .env файл присутствует в учебных целях
+
 docker compose up --build
 
 ## Django
