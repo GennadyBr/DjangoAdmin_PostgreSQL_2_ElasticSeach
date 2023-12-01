@@ -1,31 +1,42 @@
-# Films Django API, Django Admin, ETL SQLite -> Postgres, Elasticsearch, Docker, NGINX
-[Ссылка на проект](https://github.com/KarinaSmirnova/Async_API_sprint_1)
+# Сервис полнотекстового поиска по фильмам
 
-## start
-.env файл присутствует в учебных целях
+[Ссылка на проект](https://github.com/GennadyBr/PostgreSQL_2_ElasticSeach)
 
-docker compose up --build
+**проект создан для демонстрации Airflow, со следующими фичами**
+- проект упакован в Docker Compose и запущен на VPS
+- миграция из SQLite в Postgresql
+- Django Admin для редактирования PostgreSQL
+- Django API
+- миграция из Postgresql в Elasticseach для организации полнотекстового поиска по данным
+- отслеживание изменений в Postgresql и авто обновление Elasticseach
+- веб-сервер NGINX
+- логирование с помощью logging
+- линтер flake8
+- .env и docker-compose.override.yml присутствуют в демонстрационных целях
+
+## Проект уже запущен на сайте
+http://5.35.83.245:8080/home
 
 ## Django
-http://localhost:8000/
+http://5.35.83.245:8000/
 
 ## Django admin
-http://localhost:8000/admin
-http://localhost:8000/admin/movies/filmwork/
-http://localhost:8000/admin/movies/person/
-http://localhost:8000/admin/movies/genre/
+http://5.35.83.245:8000/admin
+http://5.35.83.245:8000/admin/movies/filmwork/
+http://5.35.83.245:8000/admin/movies/person/
+http://5.35.83.245:8000/admin/movies/genre/
 
 ## API
-http://127.0.0.1:8000/api/v1/movies/
+http://5.35.83.245:8000/api/v1/movies/
 
 ## ElasticSearch
-http://localhost:9200/
+http://5.35.83.245:9200/
 
 ## ElasticSearch Movies
-http://localhost:9200/movies/_search?pretty=true&q=*:*&size=1000
+http://5.35.83.245:9200/movies/_search?pretty=true&q=*:*&size=1000
 
 ## ElasticSearch Genres
-http://localhost:9200/genres/_search?pretty=true&q=*:*&size=1000
+http://5.35.83.245:9200/genres/_search?pretty=true&q=*:*&size=1000
 
 ## ElasticSearch Persons
-http://localhost:9200/persons/_search?pretty=true&q=*:*&size=1000
+http://5.35.83.245:9200/persons/_search?pretty=true&q=*:*&size=1000

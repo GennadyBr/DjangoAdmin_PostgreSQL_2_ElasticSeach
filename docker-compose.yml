@@ -8,6 +8,7 @@ volumes:
 services:
   postgres_dc:
     image: postgres:14.7
+    container_name: postgres_dc
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -17,9 +18,9 @@ services:
     networks:
       - my_net_1
 
-
   elastic_dc:
     image: elasticsearch:8.6.2
+    container_name: elastic_dc
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -27,9 +28,9 @@ services:
     networks:
       - my_net_1
 
-
   backend:
     build: my_app
+    container_name: backend
     volumes:
       - static_volume:/opt/my_app/static/
       - media_volume:/opt/my_app/media/
@@ -46,6 +47,7 @@ services:
 
   nginx_dc:
     image: nginx:1.19.2
+    container_name: nginx_dc
     volumes:
       - ./etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./etc/nginx/conf.d:/etc/nginx/conf.d:ro
@@ -57,9 +59,9 @@ services:
     networks:
       - my_net_1
 
-
   etl_dc:
     build: etl
+    container_name: etl_dc
     restart: always
     env_file:
       - .env
