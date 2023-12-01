@@ -17,7 +17,7 @@ from psycopg.rows import dict_row
 from decorators import coroutine
 from logger import logger
 from settings import database_settings
-from models_state import JsonFileStorage, State, Base_Model, BaseStorage
+from models_state import JsonFileStorage, State, Base_Model
 
 load_dotenv()
 
@@ -59,13 +59,13 @@ sql_query_persons = """
         ORDER BY modified ASC;
 """
 
-STATE_KEY_MOVIES = 'last_movies_updated'  # ключ в словаре хранилища состояний. последний обновленный фильм
-STATE_KEY_GENRES = 'last_genres_updated'  # ключ в словаре хранилища состояний. последний обновленный жанр
-STATE_KEY_PERSONS = 'last_persons_updated'  # ключ в словаре хранилища состояний. последний обновленный жанр
+STATE_KEY_MOVIES = 'last_movies_updated'  # Ключ в словаре хранилища состояний. Последний обновленный фильм
+STATE_KEY_GENRES = 'last_genres_updated'  # Ключ в словаре хранилища состояний. Последний обновленный жанр
+STATE_KEY_PERSONS = 'last_persons_updated'  # Ключ в словаре хранилища состояний. Последний обновленный жанр
 
 
 def index_prep_movie(movie):
-    """формирование индекса"""
+    """Формирование индекса"""
     movie_dict_res = {
         "index": {"_index": "movies", "_id": str(movie['id'])},
         "doc": {
@@ -91,7 +91,7 @@ def index_prep_movie(movie):
 
 
 def index_prep_genre(genre_sql):
-    """формирование индекса"""
+    """Формирование индекса"""
     genre_dict_res = {
         "index": {"_index": "genres", "_id": str(genre_sql['id'])},
         "doc": {
@@ -106,7 +106,7 @@ def index_prep_genre(genre_sql):
 
 
 def index_prep_person(person_sql):
-    """формирование индекса"""
+    """Формирование индекса"""
     person_dict_res = {
         "index": {"_index": "persons", "_id": str(person_sql['id'])},
         "doc": {
@@ -123,7 +123,7 @@ def index_prep_person(person_sql):
 # КОРУТИНЫ ФИЛЬМОВ
 ####################################################################
 # этой корутине передаем курсор, который получаем из базы ОДИН раз.
-# не тратим ресурсы на получение курсора каждый раз
+# Не тратим ресурсы на получение курсора каждый раз
 @coroutine
 def fetch_changed_movies(cur_movie, next_node_movies: Generator) -> Generator[datetime, None, None]:
     while last_updated := (yield):  # yield принимаем datetime
@@ -142,7 +142,7 @@ def fetch_changed_movies(cur_movie, next_node_movies: Generator) -> Generator[da
                       (requests.exceptions.Timeout,
                        requests.exceptions.ConnectionError))
 def transform_movies(next_node_movies: Generator) -> Generator[list[dict], None, None]:
-    # принимаем next_node корутину из предущего метода. Generator[list[dict] список из словарей
+    # принимаем next_node корутину из предыдущего метода. Generator[list[dict] список из словарей
     while movie_dicts := (yield):
         batch = []
         for movie_dict in movie_dicts:  # итерируем СПИСОК из словарей
@@ -181,7 +181,7 @@ def save_movies(state: State) -> Generator[list[Base_Model], None, None]:
 # КОРУТИНЫ ЖАНРОВ
 ####################################################################
 # этой корутине передаем курсор, который получаем из базы ОДИН раз.
-# не тратим ресурсы на получение курсора каждый раз
+# Не тратим ресурсы на получение курсора каждый раз
 @coroutine
 def fetch_changed_genres(cur_genre, next_node_genres: Generator) -> Generator[datetime, None, None]:
     while last_updated := (yield):  # yield принимаем datetime
@@ -201,7 +201,7 @@ def fetch_changed_genres(cur_genre, next_node_genres: Generator) -> Generator[da
                       (requests.exceptions.Timeout,
                        requests.exceptions.ConnectionError))
 def transform_genres(next_node_genres: Generator) -> Generator[list[dict], None, None]:
-    # принимаем next_node корутину из предущего метода. Generator[list[dict] список из словарей
+    # принимаем next_node корутину из предыдущего метода. Generator[list[dict] список из словарей
     while genre_dicts := (yield):
         batch = []
         for genre_dict in genre_dicts:  # итерируем СПИСОК из словарей
@@ -239,7 +239,7 @@ def save_genres(state: State) -> Generator[list[Base_Model], None, None]:
 # КОРУТИНЫ ПЕРСОН
 ####################################################################
 # этой корутине передаем курсор, который получаем из базы ОДИН раз.
-# не тратим ресурсы на получение курсора каждый раз
+# Не тратим ресурсы на получение курсора каждый раз
 @coroutine
 def fetch_changed_persons(cur_person, next_node_persons: Generator) -> Generator[datetime, None, None]:
     while last_updated := (yield):  # yield принимаем datetime
@@ -295,7 +295,8 @@ if __name__ == '__main__':
     # start ElasticSearch
 
     # создание индексов в ElasticSearch
-    es_index_json_file = {'movies': 'es_movies.json', 'genres': 'es_genres.json', 'persons': 'es_persons.json'}
+    es_index_json_file = {'movies': 'json/es_movies.json', 'genres': 'json/es_genres.json',
+                          'persons': 'json/es_persons.json'}
     try:
         # перебор по 3м индексам и файлам из словаря es_index_json_file
         for index_name in es_index_json_file:
@@ -303,14 +304,16 @@ if __name__ == '__main__':
             # make Index ElasticSearch
             if not es.indices.exists(index=index_name):
                 with open(es_index_json_file[index_name], 'r') as file:
+                    logger.info(f'{file=}')
                     data = json.load(file)
                     es.indices.create(index=index_name, body=data)
     except Exception as error:
         logger.info(
-            f'{error=}, {es.info=}, {es.graph=}, {es.health_report=}, {es.logstash=}, {es.watcher=}, {es.transport=}, {es.__doc__=}')
+            f'{error=}, {es.info=}, {es.graph=}, {es.health_report=}, {es.logstash=}, '
+            f'{es.watcher=}, {es.transport=}, {es.__doc__=}')
 
     logger.info('Start loading data to Elasticsearch')
-    storage = JsonFileStorage(logger, 'storage.json')
+    storage = JsonFileStorage(logger, 'json/storage.json')
     state = State(JsonFileStorage(logger=logger))  # инициализируется Класс State - сохраненное последнее состояние
 
     dsn = make_conninfo(**database_settings.dict())  # Merge a string and keyword params into a single conninfo string
@@ -326,28 +329,28 @@ if __name__ == '__main__':
         # until the end of the session (memory, locks). Using the pattern: with conn.cursor():
 
         # Запускаем корутины они повиснут в памяти и будут ждать.
-        # сначала запускаем последнюю корутину, так как в нее будет переданы данные из предыдущей корутины
+        # Сначала запускаем последнюю корутину, так как в нее будет переданы данные из предыдущей корутины
 
         # КОРУТИНЫ ФИЛЬМОВ
         saver_coro_movies = save_movies(state)  # сюда передаем последнее состояние state
         transformer_coro_movies = transform_movies(
             next_node_movies=saver_coro_movies)  # сюда передаем предыдущую корутину
-        fetcher_coro_movies = fetch_changed_movies(cur,
-                                                   next_node_movies=transformer_coro_movies)  # сюда передаем предыдущую корутину и курсор
+        # сюда передаем предыдущую корутину и курсор
+        fetcher_coro_movies = fetch_changed_movies(cur, next_node_movies=transformer_coro_movies)
 
         # КОРУТИНЫ ЖАНРОВ
         saver_coro_genres = save_genres(state)  # сюда передаем последнее состояние state
         transformer_coro_genres = transform_genres(
             next_node_genres=saver_coro_genres)  # сюда передаем предыдущую корутину
-        fetcher_coro_genres = fetch_changed_genres(cur,
-                                                   next_node_genres=transformer_coro_genres)  # сюда передаем предыдущую корутину и курсор
+        # сюда передаем предыдущую корутину и курсор
+        fetcher_coro_genres = fetch_changed_genres(cur, next_node_genres=transformer_coro_genres)
 
         # КОРУТИНЫ ПЕРСОН
         saver_coro_persons = save_persons(state)  # сюда передаем последнее состояние state
         transformer_coro_persons = transform_persons(
             next_node_persons=saver_coro_persons)  # сюда передаем предыдущую корутину
-        fetcher_coro_persons = fetch_changed_persons(cur,
-                                                     next_node_persons=transformer_coro_persons)  # сюда передаем предыдущую корутину и курсор
+        # сюда передаем предыдущую корутину и курсор
+        fetcher_coro_persons = fetch_changed_persons(cur, next_node_persons=transformer_coro_persons)
 
         while True:
             # КОРУТИНЫ ФИЛЬМОВ
@@ -377,4 +380,4 @@ if __name__ == '__main__':
             logger.info(f'last date of updated movie, {state.get_state(STATE_KEY_MOVIES)}')
             logger.info(f'last date of updated genre, {state.get_state(STATE_KEY_GENRES)}')
             logger.info(f'last date of updated person, {state.get_state(STATE_KEY_PERSONS)}')
-            sleep(10)  # вечный цикл который ждет изменений в базе. С задержкой 10 сек
+            sleep(10)  # Вечный цикл который ждет изменений в базе. С задержкой 10 сек

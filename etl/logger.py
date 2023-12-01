@@ -1,7 +1,6 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
-
 logger = logging.getLogger('etl_application')
 logger.setLevel(logging.INFO)
 
@@ -11,4 +10,3 @@ formatter = logging.Formatter(
 )
 fh.setFormatter(formatter)
 logger.addHandler(fh)
-
