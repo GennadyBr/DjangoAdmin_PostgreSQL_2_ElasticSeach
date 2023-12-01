@@ -6,8 +6,6 @@ while ! nc -z $DB_HOST $DB_PORT; do
 done
 echo "PostgreSQL started"
 
-
-
 #bash run_uwsgi.sh
 
 #echo ">>>MIGRATE database"
@@ -21,10 +19,6 @@ DJANGO_SUPERUSER_USERNAME=admin \
 DJANGO_SUPERUSER_PASSWORD=123123 \
 DJANGO_SUPERUSER_EMAIL=mail@mail.ru \
 python manage.py createsuperuser --noinput
-
-#echo ">>>LOAD DATA"
-#cd sqlite_to_postgres
-#python load_data.py
 
 echo ">>>Start runserver"
 #cd ..

@@ -70,4 +70,3 @@ class FilmworkAdmin(admin.ModelAdmin):
 
     # Поиск по полям
     search_fields = ('title', 'description', 'id')
-

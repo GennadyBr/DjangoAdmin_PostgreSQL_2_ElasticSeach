@@ -1,17 +1,3 @@
-# Environments
-#.env
-#.venv
-#env/
-#venv/
-#ENV/
-#env.bak/
-#venv.bak/
-#/etl/.env
-#/my_app/.env
-#/my_app/config/.env
-
-README.md
-
 /my_app/venv/
 /my_app/movies/locale/ru/LC_MESSAGES/django.mo
 /my_app/drafts.py
