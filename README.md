@@ -3,7 +3,6 @@
 [Ссылка на проект](https://github.com/GennadyBr/PostgreSQL_2_ElasticSeach)
 
 **проект создан для демонстрации Airflow, со следующими фичами**
-- проект упакован в Docker Compose и запущен на VPS
 - миграция из SQLite в Postgresql
 - Django Admin для редактирования PostgreSQL
 - Django API
@@ -13,6 +12,7 @@
 - логирование с помощью logging
 - линтер flake8
 - .env и docker-compose.override.yml присутствуют в демонстрационных целях
+- проект упакован в Docker Compose и запущен на VPS
 
 ## Проект уже запущен на сайте
 http://5.35.83.245:8080/home

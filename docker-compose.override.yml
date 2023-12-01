@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres_dc:
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
       - my_net_1
 
@@ -22,7 +22,7 @@ services:
 
   elastic_dc:
     ports:
-      - "9200:9200"
+      - "9201:9200"
     networks:
       - my_net_1
 
