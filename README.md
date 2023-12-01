@@ -15,28 +15,29 @@
 - проект упакован в Docker Compose и запущен на VPS
 
 ## Проект уже запущен на сайте
-http://5.35.83.245:8080/home
-
 ## Django
 http://5.35.83.245:8000/
 
 ## Django admin
 http://5.35.83.245:8000/admin
+
 http://5.35.83.245:8000/admin/movies/filmwork/
+
 http://5.35.83.245:8000/admin/movies/person/
+
 http://5.35.83.245:8000/admin/movies/genre/
 
 ## API
 http://5.35.83.245:8000/api/v1/movies/
 
 ## ElasticSearch
-http://5.35.83.245:9200/
+http://5.35.83.245:9201/
 
 ## ElasticSearch Movies
-http://5.35.83.245:9200/movies/_search?pretty=true&q=*:*&size=1000
+http://5.35.83.245:9201/movies/_search?pretty=true&q=*:*&size=1000
 
 ## ElasticSearch Genres
-http://5.35.83.245:9200/genres/_search?pretty=true&q=*:*&size=1000
+http://5.35.83.245:9201/genres/_search?pretty=true&q=*:*&size=1000
 
 ## ElasticSearch Persons
-http://5.35.83.245:9200/persons/_search?pretty=true&q=*:*&size=1000
+http://5.35.83.245:9201/persons/_search?pretty=true&q=*:*&size=1000

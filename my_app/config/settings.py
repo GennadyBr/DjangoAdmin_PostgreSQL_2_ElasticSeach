@@ -18,8 +18,6 @@ from split_settings.tools import include
 
 load_dotenv()
 
-# SWAGGER_JSON = '/home/gennady/PY_YANDEX/new_admin_panel_sprint_2/django_api/openapi.yaml'
-#Переменная окружения SWAGGER_JSON необходима, чтобы указать интерфейсу, где именно искать спецификацию openapi.yaml
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

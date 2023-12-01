@@ -6,6 +6,40 @@ volumes:
   media_volume:
 
 services:
+  backend:
+    build: my_app
+    container_name: backend
+    volumes:
+      - static_volume:/opt/my_app/static/
+      - media_volume:/opt/my_app/media/
+    env_file:
+      - .env
+    depends_on:
+      - postgres_dc
+      - elastic_dc
+    links:
+      - postgres_dc
+      - elastic_dc
+    networks:
+      - my_net_1
+
+  etl_dc:
+    build: etl
+    container_name: etl_dc
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - my_net_1
+    depends_on:
+      - postgres_dc
+      - elastic_dc
+      - backend
+    links:
+      - postgres_dc
+      - elastic_dc
+      - backend
+
   postgres_dc:
     image: postgres:14.7
     container_name: postgres_dc
@@ -28,23 +62,6 @@ services:
     networks:
       - my_net_1
 
-  backend:
-    build: my_app
-    container_name: backend
-    volumes:
-      - static_volume:/opt/my_app/static/
-      - media_volume:/opt/my_app/media/
-    env_file:
-      - .env
-    depends_on:
-      - postgres_dc
-      - elastic_dc
-    links:
-      - postgres_dc
-      - elastic_dc
-    networks:
-      - my_net_1
-
   nginx_dc:
     image: nginx:1.19.2
     container_name: nginx_dc
@@ -58,23 +75,6 @@ services:
       - backend
     networks:
       - my_net_1
-
-  etl_dc:
-    build: etl
-    container_name: etl_dc
-    restart: always
-    env_file:
-      - .env
-    networks:
-      - my_net_1
-    depends_on:
-      - postgres_dc
-      - elastic_dc
-      - backend
-    links:
-      - postgres_dc
-      - elastic_dc
-      - backend
 
 
 networks:
