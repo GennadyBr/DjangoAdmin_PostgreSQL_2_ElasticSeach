@@ -1,6 +1,6 @@
 # Сервис полнотекстового поиска по фильмам + Django Admin Panel
 
-[Ссылка на проект](https://github.com/GennadyBr/PostgreSQL_2_ElasticSeach)
+[Ссылка на проект](https://github.com/GennadyBr/DjangoAdmin_PostgreSQL_2_ElasticSeach)
 
 **проект позволяет управлять базой с Фильмами, Жанрами, Персонами через Django Admin, а также автоматически переносит данные из PostgreSQL в Elasticseach для полнотекстового поиска, для этого реализованы следующие фичи**
 - миграция из SQLite в Postgresql
