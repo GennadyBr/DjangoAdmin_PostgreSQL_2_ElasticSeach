@@ -165,9 +165,9 @@ def save_movies(state: State) -> Generator[list[Base_Model], None, None]:
             index_dict = {'index': movie.index}
             body.append(index_dict)
             body.append(movie.doc)  #
-        # logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
-        res = es.bulk(operations=body, )
-        # logger.info(res)
+        logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
+        res = es.bulk(operations=body,)
+        logger.info(res)
         logger.info('**MOVIES**')
         logger.info(f'Q-ty of Movies inserted= {len(movies)}')
         logger.info(f'List of movies {[m.doc["title"] for m in movies]}')
@@ -224,9 +224,9 @@ def save_genres(state: State) -> Generator[list[Base_Model], None, None]:
             index_dict = {'index': genre_model.index}
             body.append(index_dict)
             body.append(genre_model.doc)  #
-        # logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
+        logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
         res = es.bulk(operations=body, )
-        # logger.info(res)
+        logger.info(res)
         logger.info('**GENRES**')
         logger.info(f'Q-ty of Genres inserted= {len(genre_dicts)}')
         logger.info(f'List of genres: {[g.doc["name"] for g in genre_dicts]}')
@@ -280,9 +280,9 @@ def save_persons(state: State) -> Generator[list[Base_Model], None, None]:
             index_dict = {'index': person_model.index}
             body.append(index_dict)
             body.append(person_model.doc)  #
-        # logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
+        logger.info(f'ADDED, {type(body)=} {body=}')  # логируем JSON
         res = es.bulk(operations=body, )
-        # logger.info(res)
+        logger.info(res)
         logger.info('**PERSONS**')
         logger.info(f'Q-ty of Persons inserted= {len(person_dicts)}')
         logger.info(f'List of genres: {[g.doc["full_name"] for g in person_dicts]}')
@@ -299,6 +299,7 @@ if __name__ == '__main__':
                           'persons': 'json/es_persons.json'}
     try:
         # перебор по 3м индексам и файлам из словаря es_index_json_file
+        logger.info(f'{es_index_json_file=}')
         for index_name in es_index_json_file:
             es = Elasticsearch(os.getenv('ES_HOST_PORT'))
             # make Index ElasticSearch
@@ -306,6 +307,7 @@ if __name__ == '__main__':
                 with open(es_index_json_file[index_name], 'r') as file:
                     logger.info(f'{file=}')
                     data = json.load(file)
+                    logger.info(f'{data=}')
                     es.indices.create(index=index_name, body=data)
     except Exception as error:
         logger.info(
