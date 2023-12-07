@@ -15,7 +15,7 @@ services:
 
   nginx_dc:
     ports:
-      - "80:80"
+      - "81:81"
     networks:
       - my_net_1
 
