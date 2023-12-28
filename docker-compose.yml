@@ -2,8 +2,11 @@ version: '3.8'
 
 volumes:
   postgres_data:
+    external: true
   static_volume:
+    external: true
   media_volume:
+    external: true
 #  nginx_volume:
 
 services:
