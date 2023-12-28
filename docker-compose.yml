@@ -17,9 +17,9 @@ services:
 #      - "8000:8000"
     expose:
       - 8000
-    volumes:
-      - static_volume:/opt/my_app/static/
-      - media_volume:/opt/my_app/media/
+#    volumes:
+#      - static_volume:/opt/my_app/static/
+#      - media_volume:/opt/my_app/media/
     env_file:
       - .env
     depends_on:
