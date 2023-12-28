@@ -4,12 +4,16 @@ volumes:
   postgres_data:
   static_volume:
   media_volume:
-  nginx_volume:
+#  nginx_volume:
 
 services:
   backend:
     build: my_app
     container_name: backend
+#    ports:
+#      - "8000:8000"
+    expose:
+      - 8000
     volumes:
       - static_volume:/opt/my_app/static/
       - media_volume:/opt/my_app/media/
@@ -21,8 +25,8 @@ services:
     links:
       - postgres_dc
       - elastic_dc
-    networks:
-      - my_net_1
+#    networks:
+#      - my_net_1
     restart: always
 
   etl_dc:
@@ -31,8 +35,8 @@ services:
     restart: always
     env_file:
       - .env
-    networks:
-      - my_net_1
+#    networks:
+#      - my_net_1
     depends_on:
       - postgres_dc
       - elastic_dc
@@ -49,10 +53,14 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: always
+    expose:
+      - 5432
+#    ports:
+#      - "5433:5432"
     env_file:
       - .env
-    networks:
-      - my_net_1
+#    networks:
+#      - my_net_1
 
   elastic_dc:
     image: elasticsearch:8.6.2
@@ -61,26 +69,34 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms200m -Xmx200m"
-    networks:
-      - my_net_1
+    expose:
+      - 9200
+#    ports:
+#      - "9201:9200"
+#    networks:
+#      - my_net_1
     restart: always
 
-  nginx_dc:
-    image: nginx:1.19.2
-    container_name: nginx_dc
-    volumes:
-      - ./etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./etc/nginx/conf.d:/etc/nginx/conf.d:ro
-      - nginx_volume:/data/:ro
-      - static_volume:/opt/my_app/static/
-      - media_volume:/opt/my_app/media/
-    depends_on:
-      - backend
-    networks:
-      - my_net_1
-    restart: always
-
-
+#  nginx_dc:
+#    image: nginx:1.19.2
+#    container_name: nginx_dc
+#    volumes:
+#      - ./etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+#      - ./etc/nginx/conf.d:/etc/nginx/conf.d:ro
+#      - nginx_volume:/data/:ro
+#      - static_volume:/opt/my_app/static/
+#      - media_volume:/opt/my_app/media/
+#    depends_on:
+#      - backend
+#    networks:
+#      - my_net_1
+#    restart: always
+#
+#
+#networks:
+#  my_net_1:
+#    driver: bridge
 networks:
-  my_net_1:
-    driver: bridge
+  default:
+    name: nginx_proxy
+    external: true
