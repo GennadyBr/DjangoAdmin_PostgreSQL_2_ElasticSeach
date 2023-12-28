@@ -13,10 +13,10 @@ services:
   backend:
     build: my_app
     container_name: backend
-#    ports:
-#      - "8000:8000"
-    expose:
-      - 8000
+    ports:
+      - "8000:8000"
+#    expose:
+#      - 8000
 #    volumes:
 #      - static_volume:/opt/my_app/static/
 #      - media_volume:/opt/my_app/media/
