@@ -60,7 +60,7 @@ services:
 #    expose:
 #      - 9200
     ports:
-      - "9201:9200"
+      - "9202:9200"
     restart: always
 
 networks:
