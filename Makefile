@@ -1,10 +1,10 @@
-upvm:
+upv:
 	sudo docker-compose up -d --build
 
-downvm:
+downv:
 	sudo docker-compose down --remove-orphans
 
-psvm:
+psv:
 	sudo docker-compose ps
 
 up:
