@@ -1,14 +1,5 @@
 version: '3.8'
 
-volumes:
-  postgres_data:
-#    external: true
-  static_volume:
-#    external: true
-  media_volume:
-#    external: true
-#  nginx_volume:
-
 services:
   backend:
     build: my_app
@@ -28,8 +19,6 @@ services:
     links:
       - postgres_dc
       - elastic_dc
-#    networks:
-#      - my_net_1
     restart: always
 
   etl_dc:
@@ -38,8 +27,6 @@ services:
     restart: always
     env_file:
       - .env
-#    networks:
-#      - my_net_1
     depends_on:
       - postgres_dc
       - elastic_dc
@@ -62,8 +49,6 @@ services:
 #      - "5433:5432"
     env_file:
       - .env
-#    networks:
-#      - my_net_1
 
   elastic_dc:
     image: elasticsearch:8.6.2
@@ -72,34 +57,18 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms200m -Xmx200m"
-    expose:
-      - 9200
-#    ports:
-#      - "9201:9200"
-#    networks:
-#      - my_net_1
+#    expose:
+#      - 9200
+    ports:
+      - "9200:9200"
     restart: always
 
-#  nginx_dc:
-#    image: nginx:1.19.2
-#    container_name: nginx_dc
-#    volumes:
-#      - ./etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-#      - ./etc/nginx/conf.d:/etc/nginx/conf.d:ro
-#      - nginx_volume:/data/:ro
-#      - static_volume:/opt/my_app/static/
-#      - media_volume:/opt/my_app/media/
-#    depends_on:
-#      - backend
-#    networks:
-#      - my_net_1
-#    restart: always
-#
-#
-#networks:
-#  my_net_1:
-#    driver: bridge
 networks:
   default:
     name: nginx_proxy
     external: true
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
