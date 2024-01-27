@@ -37,7 +37,7 @@ services:
       - backend
 
   postgres_dc:
-    image: postgres:14.7
+    image: postgres:14.1-alpine
     container_name: postgres_dc
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -51,7 +51,7 @@ services:
       - .env
 
   elastic_dc:
-    image: elasticsearch:8.6.2
+    image: elasticsearch:8.10.2
     container_name: elastic_dc
     environment:
       - discovery.type=single-node
